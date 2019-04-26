@@ -1,0 +1,7 @@
+{
+    "require": {
+        "guzzlehttp/guzzle": "~6.0",
+        "acdh-oeaw/easyrdf": "^0.13.2",
+        "zozlak/util": "^1.5"
+    }
+}
