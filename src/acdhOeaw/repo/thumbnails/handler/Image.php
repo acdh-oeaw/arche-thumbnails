@@ -42,7 +42,7 @@ class Image implements HandlerInterface {
     }
 
     public function getHandledMimeTypes(): array {
-        return ['image/png', 'image/jpeg', 'image/tiff'];
+        return ['image/png', 'image/jpeg', 'image/tiff', 'image/svg+xml'];
     }
 
     public function createThumbnail(ResourceInterface $resource, int $width,
