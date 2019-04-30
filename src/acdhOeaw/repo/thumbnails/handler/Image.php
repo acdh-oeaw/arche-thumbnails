@@ -50,14 +50,14 @@ class Image implements HandlerInterface {
         $srcPath   = $resource->getNotSmallerThumbnailPath($width, $height);
         $src       = new Imagick();
         $src->readImage($srcPath);
-        $src->resizeImage($height, $width, Imagick::FILTER_LANCZOS, 1, true);
+        $src->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1, true);
         $srcWidth  = $src->getImageWidth();
         $srcHeight = $src->getImageHeight();
         $x         = round(($width - $srcWidth) / 2);
         $y         = round(($height - $srcHeight) / 2);
 
         $trgt = new Imagick();
-        $trgt->newImage($height, $width, new ImagickPixel('transparent'));
+        $trgt->newImage($width, $height, new ImagickPixel('transparent'));
         $trgt->compositeImage($src, Imagick::COMPOSITE_COPY, $x, $y);
         $trgt->writeImage('png:' . $path);
     }
