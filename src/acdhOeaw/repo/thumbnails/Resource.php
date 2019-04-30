@@ -152,15 +152,23 @@ class Resource implements ResourceInterface {
         return clone($this->meta);
     }
 
+    public function getResourcePath(): string {
+        return $this->getThumbnailPath();
+    }
+
     /**
-     * Gets path to a resource thumbnail in a given dimensions.
+     * Gets path to an already cached resource thumbnail of a given dimensions.
      * 
-     * If $width and $height is not specified, returns path to the original resource file.
+     * If $width and $height are not specified, returns path to the original resource file.
+     * 
+     * If the thumbnail of a given dimensions is not yet cached, a 
+     * \acdhOeaw\repo\thumbnails\NoSuchFileException exception is thrown but the resource
+     * in original dimensions can be assumed to be always available.
      * 
      * @param int $width
      * @param int $height
      * @return string
-     * @throws NoSuchFileException
+     * @throws \acdhOeaw\repo\thumbnails\NoSuchFileException
      */
     public function getThumbnailPath(int $width = 0, int $height = 0): string {
         $path = $this->getFilePath($width, $height);
@@ -173,32 +181,6 @@ class Resource implements ResourceInterface {
         }
 
         return $path;
-    }
-
-    /**
-     * Gets path to a resource thumbnail in a given dimensions. If such a thumbnail 
-     * is not available in cache, returns path to the smallest cached one which
-     * is not smaller than requested dimensions.
-     * 
-     * @param int $width
-     * @param int $height
-     * @return string
-     * @throws NoSuchFileException
-     */
-    public function getNotSmallerThumbnailPath(int $width, int $height): string {
-        $path = $this->getFilePath($width, $height);
-        if (file_exists($path)) {
-            return $path;
-        }
-        $files = $this->listFiles(\SCANDIR_SORT_ASCENDING);
-        foreach ($files as $w => $heights) {
-            foreach ($heights as $h) {
-                if ((int) $w >= $width && (int) $h >= $height) {
-                    return $this->getFilePath((int) $w, (int) $h);
-                }
-            }
-        }
-        return $this->fetchResourceFile();
     }
 
     public function getConfig(string $property) {
@@ -214,7 +196,7 @@ class Resource implements ResourceInterface {
      * @param int $order \SCANDIR_SORT_ASCENDING or SCANDIR_SORT_DESCENDING
      * @return array
      */
-    private function listFiles(int $order): array {
+    public function getCachedFiles(int $order): array {
         $dir = dirname($this->getFilePath());
         if (!is_dir($dir)) {
             return [];

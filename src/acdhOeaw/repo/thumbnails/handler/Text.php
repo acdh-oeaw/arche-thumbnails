@@ -49,13 +49,14 @@ class Text implements HandlerInterface {
 
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path) {
-        $srcPath   = $resource->getThumbnailPath(0, 0);
+        $srcPath   = $resource->getMeta()->url;
         $srcHandle = fopen($srcPath, 'r');
         $nLines    = max($resource->getConfig('textMinLines'), $height / $resource->getConfig('textLineHeight'));
         $lines     = [];
         while (count($lines) < $nLines) {
             $lines[] = fgets($srcHandle, 1000);
         }
+        fclose($srcHandle);
 
         $x          = (int) ($width * $resource->getConfig('textMargin'));
         $y          = (int) min($x, $height * $resource->getConfig('textMargin'));

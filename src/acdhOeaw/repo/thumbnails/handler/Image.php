@@ -47,7 +47,7 @@ class Image implements HandlerInterface {
 
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path) {
-        $srcPath   = $resource->getNotSmallerThumbnailPath($width, $height);
+        $srcPath   = $resource->getResourcePath();
         $src       = new Imagick();
         $src->readImage($srcPath);
         $src->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1, true);
