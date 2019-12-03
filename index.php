@@ -41,8 +41,12 @@ if (!preg_match('|^https?://|', $url)) {
     $url = $config->get('archeIdPrefix') . $url;
 }
 
-$width  = filter_input(INPUT_GET, 'width') ?? $config->get('thumbnailDefaultWidth');
-$height = filter_input(INPUT_GET, 'height') ?? $config->get('thumbnailDefaultHeight');
+$width  = filter_input(INPUT_GET, 'width') ?? 0;
+$height = filter_input(INPUT_GET, 'height') ?? 0;
+if ($width === 0 && $height === 0) {
+    $width  = $config->get('thumbnailDefaultWidth');
+    $height = $config->get('thumbnailDefaultHeight');
+}
 
 $res   = new Resource($url, $config);
 $path = $res->getThumbnail($width, $height);

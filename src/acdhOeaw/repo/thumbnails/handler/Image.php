@@ -50,6 +50,9 @@ class Image implements HandlerInterface {
         $srcPath   = $resource->getResourcePath();
         $src       = new Imagick();
         $src->readImage($srcPath);
+        $ratio     = $src->getImageWidth() / $src->getImageHeight();
+        $width     = $width > 0 ? $width : $height * $ratio;
+        $height    = $height > 0 ? $height : $width / $ratio;
         $src->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1, true);
         $srcWidth  = $src->getImageWidth();
         $srcHeight = $src->getImageHeight();
