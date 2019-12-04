@@ -47,6 +47,10 @@ class Fallback implements HandlerInterface {
         return [];
     }
 
+    public function maintainsAspectRatio(): bool {
+        return false;
+    }
+
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path) {
         // sanitize the mime type
@@ -63,7 +67,7 @@ class Fallback implements HandlerInterface {
 
         // Imagick initialization
         $trgt = new Imagick();
-        $trgt->newImage($height, $width, new ImagickPixel('transparent'));
+        $trgt->newImage($width, $height, new ImagickPixel('transparent'));
 
         $draw  = new ImagickDraw();
         $white = new ImagickPixel('white');

@@ -45,6 +45,10 @@ class Image implements HandlerInterface {
         return ['image/png', 'image/jpeg', 'image/tiff', 'image/svg+xml'];
     }
 
+    public function maintainsAspectRatio(): bool {
+        return true;
+    }
+
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path) {
         $srcPath   = $resource->getResourcePath();

@@ -4,3 +4,4 @@
 *.sqlite
 /config.ini
 /tmp
+/cache

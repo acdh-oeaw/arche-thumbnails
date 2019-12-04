@@ -47,6 +47,10 @@ class Text implements HandlerInterface {
             'text/xml', 'text/plain'];
     }
 
+    public function maintainsAspectRatio(): bool {
+        return false;
+    }
+
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path) {
         $srcPath   = $resource->getMeta()->url;

@@ -45,6 +45,15 @@ interface HandlerInterface {
     public function getHandledMimeTypes(): array;
 
     /**
+     * Is the handler able to maintain the aspect ratio?
+     * (in other words is it possible to pass only one dimension and the other
+     * will be computed automatically)
+     *
+     * @return bool
+     */
+    public function maintainsAspectRatio(): bool;
+
+    /**
      * Creates a thumbnail with given dimensions for a given resource
      * 
      * @param ResourceInterface $resource

@@ -131,7 +131,12 @@ class Resource implements ResourceInterface {
             mkdir($dir, 0700, true);
         }
 
-        if (!file_exists($path) && isset($this->handlers[$this->meta->mime])) {
+        $handler = $this->handlers[$this->meta->mime] ?? null;
+        if (!file_exists($path) && $handler !== null) {
+            if (!$handler->maintainsAspectRatio()) {
+                $width  = $width > 0 ? $width : $this->config->get('thumbnailDefaultWidth');
+                $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
+            }
             try {
                 $this->handlers[$this->meta->mime]->createThumbnail($this, $width, $height, $path);
             } catch (Throwable $ex) {
@@ -142,6 +147,10 @@ class Resource implements ResourceInterface {
         if (!file_exists($path)) {
             $handlerClass = $this->config->get('mimeFallbackHandler');
             $handler      = new $handlerClass();
+            if (!$handler->maintainsAspectRatio()) {
+                $width  = $width > 0 ? $width : $this->config->get('thumbnailDefaultWidth');
+                $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
+            }
             $handler->createThumbnail($this, $width, $height, $path);
         }
 
