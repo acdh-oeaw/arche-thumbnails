@@ -303,14 +303,14 @@ class Resource implements ResourceInterface {
         if (empty($this->meta->checkDate) || $diff > $this->config->get('cacheKeepAlive')) {
             $realUrl = $this->resolveUrl($this->url);
             $graph   = new Graph();
-            $graph->parse(file_get_contents($realUrl . '/fcr:metadata'));
+            $graph->parse(file_get_contents($realUrl . '/metadata'));
             $meta    = $graph->resource($realUrl);
 
             $titleImage = (string) $meta->getResource($this->config->get('archeTitleImageProp'));
             if (!empty($titleImage)) {
                 $realUrl = $this->resolveUrl($titleImage);
                 $graph   = new Graph();
-                $graph->parse(file_get_contents($realUrl . '/fcr:metadata'));
+                $graph->parse(file_get_contents($realUrl . '/metadata'));
                 $meta    = $graph->resource($realUrl);
             }
 
