@@ -53,6 +53,12 @@ class Fallback implements HandlerInterface {
 
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path) {
+        // upscaling for nice font rendering in low resolution
+	$upscale = 400 / min($width, $height);
+        $upscale = $upscale <= 1 ? 1 : ceil($upscale);
+        $width   *= $upscale;
+        $height  *= $upscale;
+
         // sanitize the mime type
         $mime = $resource->getMeta()->mime;
         if (empty($mime)) {
@@ -135,6 +141,8 @@ class Fallback implements HandlerInterface {
 
         // output
         $trgt->drawImage($draw);
+
+        $trgt->resizeImage($width / $upscale, $height / $upscale, Imagick::FILTER_LANCZOS, 1, true); 
         $trgt->writeImage('png:' . $path);
     }
 
