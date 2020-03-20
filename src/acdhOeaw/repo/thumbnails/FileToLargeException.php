@@ -31,6 +31,6 @@ namespace acdhOeaw\repo\thumbnails;
  *
  * @author zozlak
  */
-class FileToLargeException extends NoSuchFile {
+class FileToLargeException extends NoSuchFileException {
     
 }
