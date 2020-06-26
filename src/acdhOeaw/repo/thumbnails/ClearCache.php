@@ -89,6 +89,7 @@ class ClearCache {
             while ($sizeSum > $maxSizeMb && count($files) > 0) {
                 $file = array_pop($files);
                 echo "removing $file \n";
+                unlink($file);
                 $sizeSum -= $bySize[$file];
             }
         }
