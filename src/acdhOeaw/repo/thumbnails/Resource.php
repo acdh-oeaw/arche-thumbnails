@@ -36,6 +36,7 @@ use GuzzleHttp\Exception\RequestException;
 use acdhOeaw\acdhRepoLib\RepoResourceInterface;
 use acdhOeaw\acdhRepoLib\SearchTerm;
 use zozlak\util\Config;
+use zozlak\logging\Logger;
 
 /**
  * Description of Resource
@@ -44,6 +45,10 @@ use zozlak\util\Config;
  */
 class Resource implements ResourceInterface {
 
+    /**
+     *
+     * @var \GuzzleHttp\Client;
+     */
     static private $client;
 
     static private function resolveUrl(string $url): string {
@@ -99,6 +104,8 @@ class Resource implements ResourceInterface {
      * @param Config $config
      */
     public function __construct(string $id, Config $config) {
+        Logger::info("Processing $id");
+
         $this->config = $config;
         $this->url    = $id;
         $this->meta   = new ResourceMeta();
@@ -127,7 +134,10 @@ class Resource implements ResourceInterface {
      */
     public function getThumbnail(int $width = 0, int $height = 0): string {
         $path = $this->getFilePath($width, $height);
-        $dir  = dirname($path);
+        if (file_exists($path)) {
+            Logger::info("\tfound in cache");
+        }
+        $dir = dirname($path);
 
         if (!is_dir($dir)) {
             mkdir($dir, 0700, true);
@@ -140,9 +150,11 @@ class Resource implements ResourceInterface {
                 $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
             }
             try {
+                Logger::info("\tusing the " . get_called_class($this->handlers[$this->meta->mime]) . " handler");
+                Logger::info($this->getResourcePath());
                 $this->handlers[$this->meta->mime]->createThumbnail($this, $width, $height, $path);
             } catch (Throwable $ex) {
-                
+                Logger::error($ex);
             }
         }
 
@@ -154,6 +166,8 @@ class Resource implements ResourceInterface {
                 $width  = $width > 0 ? $width : $this->config->get('thumbnailDefaultWidth');
                 $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
             }
+            Logger::info("\thandler for " . $this->meta->mime . " unavailable - using the fallback handler");
+            Logger::info("\t\thandlers available for " . implode(', ', array_keys($this->handlers)));
             $handler->createThumbnail($this, $width, $height, $path);
         }
 
@@ -296,7 +310,7 @@ class Resource implements ResourceInterface {
         $oldMeta = $this->meta;
 
         // compute time since last repository metadata check and update the local db
-        $diff = $this->config->get('cacheKeepAlive');
+        $diff = max(999999999, $this->config->get('cacheKeepAlive'));
         if (!empty($this->meta->checkDate)) {
             $diff = (new DateTime())->diff($this->meta->checkDate);
             $diff = $diff->days * 24 * 3600 + $diff->h * 3600 + $diff->i * 60 + $diff->s;
@@ -304,6 +318,8 @@ class Resource implements ResourceInterface {
 
         // if needed, fetch metadata from the repository
         if (empty($this->meta->checkDate) || $diff > $this->config->get('cacheKeepAlive')) {
+            Logger::info("\tfetching fresh metadata from the repository ($diff s)");
+
             $meta    = null;
             $realUrl = $this->resolveUrl($this->url);
             $realUrl = preg_replace('|/metadata|', '', $realUrl);
@@ -321,9 +337,11 @@ class Resource implements ResourceInterface {
             try {
                 $resp = self::$client->send(new Request('GET', $searchUrl, $headers));
                 if ($resp->getStatusCode() === 200) {
-                    $graph = new Graph();
+                    $graph   = new Graph();
                     $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
-                    $meta  = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
+                    $meta    = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
+                    $realUrl = $meta->getUri();
+                    Logger::info("\t\tthumbnail pointing to the resource found");
                 }
             } catch (RequestException $e) {
                 
@@ -337,6 +355,7 @@ class Resource implements ResourceInterface {
                         $graph = new Graph();
                         $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
                         $meta  = $graph->resource($realUrl);
+                        Logger::info("\t\tusing resource itself");
                     }
                 } catch (RequestException $e) {
                     
@@ -354,15 +373,15 @@ class Resource implements ResourceInterface {
 
             if (empty($oldMeta->checkDate)) {
                 $query = $this->pdo->prepare("
-                INSERT INTO resources (check_date, repo_hash, mime, size_mb, real_url, url)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
+                    INSERT INTO resources (check_date, repo_hash, mime, size_mb, real_url, url)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
             } else {
                 $query = $this->pdo->prepare("
-                UPDATE resources 
-                SET check_date = ?, repo_hash = ?, mime = ?, size_mb = ?, real_url = ?
-                WHERE url = ?
-            ");
+                    UPDATE resources 
+                    SET check_date = ?, repo_hash = ?, mime = ?, size_mb = ?, real_url = ?
+                    WHERE url = ?
+                ");
             }
             $param = [
                 $this->meta->checkDate->format('Y-m-d H:i:s'),
@@ -373,12 +392,15 @@ class Resource implements ResourceInterface {
                 $this->url,
             ];
             $query->execute($param);
+        } else {
+            Logger::info("\tlocal metadata valid ($diff)");
         }
+        Logger::info("\t" . json_encode($this->meta));
 
-        // if metadata suggest resouce has changed, delete local cache
+        // if metadata suggest resource has changed, delete local cache
         $dir = dirname($this->getFilePath());
         if ($oldMeta->repoHash !== $this->meta->repoHash && is_dir($dir)) {
-            echo "outdated cache!\n";
+            Logger::info("\tresource has changed - removing local cache");
             foreach (scandir($dir) as $i) {
                 $path = $dir . '/' . $i;
                 if (is_file($path)) {

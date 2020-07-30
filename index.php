@@ -25,6 +25,8 @@
  */
 
 use zozlak\util\Config;
+use zozlak\logging\Log;
+use zozlak\logging\Logger;
 use acdhOeaw\repo\thumbnails\Resource;
 
 header('Access-Control-Allow-Origin: *');
@@ -33,6 +35,8 @@ header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 $composer = require_once 'vendor/autoload.php';
 
 $config = new Config('config.ini');
+
+Logger::addLog(new Log($config->get('logFile')), $config->get('logLevel'));
 
 // extract ARCHE id from the request URL
 $url = substr($_SERVER['REDIRECT_URL'], strlen($config->get('baseUrl')));
