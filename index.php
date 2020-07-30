@@ -31,7 +31,6 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
 $composer = require_once 'vendor/autoload.php';
-$composer->addPsr4('acdhOeaw\\', __DIR__ . '/src/acdhOeaw');
 
 $config = new Config('config.ini');
 
