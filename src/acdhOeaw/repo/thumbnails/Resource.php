@@ -33,6 +33,8 @@ use EasyRdf\Graph;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\RequestException;
+use acdhOeaw\acdhRepoLib\RepoResourceInterface;
+use acdhOeaw\acdhRepoLib\SearchTerm;
 use zozlak\util\Config;
 
 /**
@@ -140,9 +142,10 @@ class Resource implements ResourceInterface {
             try {
                 $this->handlers[$this->meta->mime]->createThumbnail($this, $width, $height, $path);
             } catch (Throwable $ex) {
+                
             }
         }
-        
+
         // last chance
         if (!file_exists($path)) {
             $handlerClass = $this->config->get('mimeFallbackHandler');
@@ -301,17 +304,43 @@ class Resource implements ResourceInterface {
 
         // if needed, fetch metadata from the repository
         if (empty($this->meta->checkDate) || $diff > $this->config->get('cacheKeepAlive')) {
+            $meta    = null;
             $realUrl = $this->resolveUrl($this->url);
-            $graph   = new Graph();
-            $graph->parse(file_get_contents($realUrl . '/metadata'));
-            $meta    = $graph->resource($realUrl);
+            $realUrl = preg_replace('|/metadata|', '', $realUrl);
 
-            $titleImage = (string) $meta->getResource($this->config->get('archeTitleImageProp'));
-            if (!empty($titleImage)) {
-                $realUrl = $this->resolveUrl($titleImage);
-                $graph   = new Graph();
-                $graph->parse(file_get_contents($realUrl . '/metadata'));
-                $meta    = $graph->resource($realUrl);
+            // try to find thumbnail pointing to the resource
+            $baseUrl   = substr($realUrl, 0, strrpos($realUrl, '/'));
+            $searchUrl = $baseUrl . '/search' .
+                '?property[0]=' . urlencode($this->config->get('archeTitleImageProp')) .
+                '&value[0]=' . urlencode($this->url) .
+                '&type[0]=' . urlencode(SearchTerm::TYPE_RELATION);
+            $headers   = [
+                $this->config->get('archeMetaFetchHeader') => RepoResourceInterface::META_RESOURCE,
+                'Accept'                                   => 'application/n-triples',
+            ];
+            try {
+                $resp = self::$client->send(new Request('GET', $searchUrl, $headers));
+                if ($resp->getStatusCode() === 200) {
+                    $graph = new Graph();
+                    $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
+                    $meta  = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
+                }
+            } catch (RequestException $e) {
+                
+            }
+
+            // get the resource itself as a fallback
+            if ($meta === null) {
+                try {
+                    $resp = self::$client->send(new Request('GET', $realUrl . '/metadata', $headers));
+                    if ($resp->getStatusCode() === 200) {
+                        $graph = new Graph();
+                        $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
+                        $meta  = $graph->resource($realUrl);
+                    }
+                } catch (RequestException $e) {
+                    
+                }
             }
 
             $this->meta = new ResourceMeta([
