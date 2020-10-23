@@ -340,8 +340,10 @@ class Resource implements ResourceInterface {
                     $graph   = new Graph();
                     $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
                     $meta    = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
-                    $realUrl = $meta->getUri();
-                    Logger::info("\t\tthumbnail pointing to the resource found");
+                    if ($meta !== null) {
+                        $realUrl = $meta->getUri();
+                        Logger::info("\t\tthumbnail pointing to the resource found");
+                    }
                 }
             } catch (RequestException $e) {
                 
