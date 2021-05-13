@@ -24,9 +24,9 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails\handler;
+namespace acdhOeaw\arche\thumbnails\handler;
 
-use acdhOeaw\repo\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\ResourceInterface;
 
 /**
  * Description of FormatInterface

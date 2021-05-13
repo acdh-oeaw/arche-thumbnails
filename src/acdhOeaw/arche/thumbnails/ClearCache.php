@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails;
+namespace acdhOeaw\arche\thumbnails;
 
 use BadMethodCallException;
 use DirectoryIterator;

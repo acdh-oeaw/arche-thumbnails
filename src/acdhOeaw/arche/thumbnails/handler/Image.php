@@ -24,11 +24,11 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails\handler;
+namespace acdhOeaw\arche\thumbnails\handler;
 
 use Imagick;
 use ImagickPixel;
-use acdhOeaw\repo\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\ResourceInterface;
 
 /**
  * Creates thumbnails from image files by rescaling it to the desired resolution.

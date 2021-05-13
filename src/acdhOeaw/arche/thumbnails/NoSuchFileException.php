@@ -24,57 +24,13 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails;
+namespace acdhOeaw\arche\thumbnails;
 
 /**
- * Description of ResourceMeta
+ * Description of NoSuchFile
  *
  * @author zozlak
  */
-class ResourceMeta {
-
-    /**
-     *
-     * @var string
-     */
-    public $url;
-
-    /**
-     *
-     * @var \DateTime
-     */
-    public $checkDate;
-
-    /**
-     *
-     * @var string
-     */
-    public $repoHash;
-
-    /**
-     *
-     * @var string
-     */
-    public $mime;
-
-    /**
-     *
-     * @var int
-     */
-    public $sizeMb;
-
-    /**
-     *
-     * @var string
-     */
-    public $realUrl;
-
-    public function __construct(array $data = null) {
-        if (is_iterable($data)) {
-            foreach ($data as $k => $v) {
-                $this->$k = $v;
-            }
-        }
-    }
-
+class NoSuchFileException {
+    
 }

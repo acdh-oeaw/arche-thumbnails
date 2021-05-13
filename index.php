@@ -27,7 +27,7 @@
 use zozlak\util\Config;
 use zozlak\logging\Log;
 use zozlak\logging\Logger;
-use acdhOeaw\repo\thumbnails\Resource;
+use acdhOeaw\arche\thumbnails\Resource;
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');

@@ -24,45 +24,13 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails;
+namespace acdhOeaw\arche\thumbnails;
 
 /**
+ * Description of FileToLargeException
  *
  * @author zozlak
  */
-interface ResourceInterface {
-
-    /**
-     * Returns resource's basic metadata (URL, mime type, size,
-     * modification date, etc.)
-     *
-     * @return \acdhOeaw\repo\thumbnails\ResourceMeta
-     */
-    public function getMeta(): ResourceMeta;
-
-    /**
-     * Returns path to the file storing a repository resource payload.
-     * @return string
-     */
-    public function getResourcePath(): string;
-
-    /**
-     * Returns a configuration property value stored in the config.ini file
-     *
-     * @param string $property configuration property name
-     */
-    public function getConfig(string $property);
-
-    /**
-     * List files cached for a resource.
-     * 
-     * Returnes 2D array with first dimension indicating available widths and
-     * second dimension listing heights available for a given width. Both dimensions
-     * are encoded as strings left-padded with zeros up to 5 digits length.
-     *
-     * @param int $order \SCANDIR_SORT_ASCENDING or SCANDIR_SORT_DESCENDING
-     * @return array
-     */
-    public function getCachedFiles(int $order): array;
+class FileToLargeException extends NoSuchFileException {
+    
 }
-

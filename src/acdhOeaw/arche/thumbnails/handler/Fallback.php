@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails\handler;
+namespace acdhOeaw\arche\thumbnails\handler;
 
 use Imagick;
 use ImagickDraw;
 use ImagickPixel;
-use acdhOeaw\repo\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\ResourceInterface;
 
 /**
  * A fallback thumbnail handler creating a document-like icon filled with

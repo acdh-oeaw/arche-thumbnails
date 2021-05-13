@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-namespace acdhOeaw\repo\thumbnails;
+namespace acdhOeaw\arche\thumbnails;
 
 use DateTime;
 use Throwable;
@@ -88,7 +88,7 @@ class Resource implements ResourceInterface {
 
     /**
      *
-     * @var \acdhOeaw\repo\thumbnails\ResourceMeta
+     * @var \acdhOeaw\arche\thumbnails\ResourceMeta
      */
     private $meta;
 
@@ -188,13 +188,13 @@ class Resource implements ResourceInterface {
      * If $width and $height are not specified, returns path to the original resource file.
      * 
      * If the thumbnail of a given dimensions is not yet cached, a 
-     * \acdhOeaw\repo\thumbnails\NoSuchFileException exception is thrown but the resource
+     * \acdhOeaw\arche\thumbnails\NoSuchFileException exception is thrown but the resource
      * in original dimensions can be assumed to be always available.
      * 
      * @param int $width
      * @param int $height
      * @return string
-     * @throws \acdhOeaw\repo\thumbnails\NoSuchFileException
+     * @throws \acdhOeaw\arche\thumbnails\NoSuchFileException
      */
     public function getThumbnailPath(int $width = 0, int $height = 0): string {
         $path = $this->getFilePath($width, $height);
@@ -302,7 +302,7 @@ class Resource implements ResourceInterface {
             WHERE url = ?
         ");
         $query->execute([$this->url]);
-        $tmp   = $query->fetchObject('\\acdhOeaw\\repo\\thumbnails\\ResourceMeta');
+        $tmp   = $query->fetchObject('\\acdhOeaw\\arche\\thumbnails\\ResourceMeta');
         if ($tmp !== false) {
             $this->meta            = $tmp;
             $this->meta->checkDate = new DateTime($this->meta->checkDate);
@@ -361,6 +361,8 @@ class Resource implements ResourceInterface {
                     }
                 } catch (RequestException $e) {
                     
+                } catch (\EasyRdf\Exception $e) {
+
                 }
             }
 
