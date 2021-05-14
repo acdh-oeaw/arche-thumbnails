@@ -25,7 +25,7 @@
  */
 
 use zozlak\util\Config;
-use acdhOeaw\repo\thumbnails\ClearCache;
+use acdhOeaw\arche\thumbnails\ClearCache;
 
 $composer = require_once __DIR__ . '/vendor/autoload.php';
 $composer->addPsr4('acdhOeaw\\', __DIR__ . '/src/acdhOeaw');
