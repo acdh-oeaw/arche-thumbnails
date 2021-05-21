@@ -150,7 +150,7 @@ class Resource implements ResourceInterface {
                 $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
             }
             try {
-                Logger::info("\tusing the " . get_called_class($this->handlers[$this->meta->mime]) . " handler");
+                Logger::info("\tusing the " . get_called_class() . " handler");
                 Logger::info($this->getResourcePath());
                 $this->handlers[$this->meta->mime]->createThumbnail($this, $width, $height, $path);
             } catch (Throwable $ex) {
