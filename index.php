@@ -39,9 +39,12 @@ $config = new Config('config.ini');
 Logger::addLog(new Log($config->get('logFile')), $config->get('logLevel'));
 
 // extract ARCHE id from the request URL
-$url = substr($_SERVER['REDIRECT_URL'], strlen($config->get('baseUrl')));
-if (!preg_match('|^https?://|', $url)) {
-    $url = $config->get('archeIdPrefix') . $url;
+$url = filter_input(INPUT_GET, 'id');
+if (empty($url)) {
+    $url = substr($_SERVER['REDIRECT_URL'], strlen($config->get('baseUrl')));
+    if (!preg_match('|^https?://|', $url)) {
+        $url = $config->get('archeIdPrefix') . $url;
+    }
 }
 
 $width  = filter_input(INPUT_GET, 'width') ?? 0;
