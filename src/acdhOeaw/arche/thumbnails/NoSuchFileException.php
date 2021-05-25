@@ -31,6 +31,6 @@ namespace acdhOeaw\arche\thumbnails;
  *
  * @author zozlak
  */
-class NoSuchFileException {
+class NoSuchFileException extends \Exception {
     
 }

@@ -33,8 +33,8 @@ use EasyRdf\Graph;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\RequestException;
-use acdhOeaw\acdhRepoLib\RepoResourceInterface;
-use acdhOeaw\acdhRepoLib\SearchTerm;
+use acdhOeaw\arche\lib\RepoResourceInterface;
+use acdhOeaw\arche\lib\SearchTerm;
 use zozlak\util\Config;
 use zozlak\logging\Logger;
 
@@ -94,7 +94,7 @@ class Resource implements ResourceInterface {
 
     /**
      *
-     * @var array
+     * @var array<handler\HandlerInterface>
      */
     private $handlers = [];
 
@@ -194,7 +194,7 @@ class Resource implements ResourceInterface {
      * @param int $width
      * @param int $height
      * @return string
-     * @throws \acdhOeaw\arche\thumbnails\NoSuchFileException
+     * @throws NoSuchFileException
      */
     public function getThumbnailPath(int $width = 0, int $height = 0): string {
         $path = $this->getFilePath($width, $height);
@@ -209,7 +209,7 @@ class Resource implements ResourceInterface {
         return $path;
     }
 
-    public function getConfig(string $property) {
+    public function getConfig(string $property): mixed {
         return $this->config->get($property);
     }
 
@@ -220,7 +220,7 @@ class Resource implements ResourceInterface {
      * second dimension listing heights available for a given width. Both dimensions
      * are encoded as strings left-padded with zeros up to 5 digits length.
      * @param int $order \SCANDIR_SORT_ASCENDING or SCANDIR_SORT_DESCENDING
-     * @return array
+     * @return array<string, array<string>>
      */
     public function getCachedFiles(int $order): array {
         $dir = dirname($this->getFilePath());
@@ -290,7 +290,7 @@ class Resource implements ResourceInterface {
      * Fetches resource's metadata into $this->meta
      * (from the database or, when needed, from the repository)
      */
-    private function maintainMetadataCache() {
+    private function maintainMetadataCache(): void {
         $query = $this->pdo->prepare("
             SELECT 
                 url, 
@@ -337,9 +337,9 @@ class Resource implements ResourceInterface {
             try {
                 $resp = self::$client->send(new Request('GET', $searchUrl, $headers));
                 if ($resp->getStatusCode() === 200) {
-                    $graph   = new Graph();
+                    $graph = new Graph();
                     $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
-                    $meta    = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
+                    $meta  = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
                     if ($meta !== null) {
                         $realUrl = $meta->getUri();
                         Logger::info("\t\tthumbnail pointing to the resource found");
@@ -362,7 +362,7 @@ class Resource implements ResourceInterface {
                 } catch (RequestException $e) {
                     
                 } catch (\EasyRdf\Exception $e) {
-
+                    
                 }
             }
 
@@ -417,7 +417,7 @@ class Resource implements ResourceInterface {
     /**
      * Assures database contains all the tables
      */
-    private function maintainDb() {
+    private function maintainDb(): void {
         $this->pdo->query("
             CREATE TABLE IF NOT EXISTS resources (
                 url text primary key,
@@ -429,5 +429,4 @@ class Resource implements ResourceInterface {
             )
         ");
     }
-
 }

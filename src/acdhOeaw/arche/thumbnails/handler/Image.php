@@ -41,6 +41,10 @@ class Image implements HandlerInterface {
         
     }
 
+    /**
+     * 
+     * @return array<string>
+     */
     public function getHandledMimeTypes(): array {
         return ['image/png', 'image/jpeg', 'image/tiff', 'image/svg+xml'];
     }
@@ -50,7 +54,7 @@ class Image implements HandlerInterface {
     }
 
     public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path) {
+                                    int $height, string $path): void {
         $srcPath   = $resource->getResourcePath();
         $src       = new Imagick();
         $src->readImage($srcPath);
@@ -60,13 +64,12 @@ class Image implements HandlerInterface {
         $src->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1, true);
         $srcWidth  = $src->getImageWidth();
         $srcHeight = $src->getImageHeight();
-        $x         = round(($width - $srcWidth) / 2);
-        $y         = round(($height - $srcHeight) / 2);
+        $x         = (int) round(($width - $srcWidth) / 2);
+        $y         = (int) round(($height - $srcHeight) / 2);
 
         $trgt = new Imagick();
         $trgt->newImage($width, $height, new ImagickPixel('transparent'));
         $trgt->compositeImage($src, Imagick::COMPOSITE_COPY, $x, $y);
         $trgt->writeImage('png:' . $path);
     }
-
 }

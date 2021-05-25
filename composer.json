@@ -1,14 +1,17 @@
 {
     "require": {
-        "guzzlehttp/guzzle": "^6.5",
+        "guzzlehttp/guzzle": "^7",
         "acdh-oeaw/easyrdf": "^0.13.2",
         "zozlak/util": "^1.5",
-        "acdh-oeaw/arche-lib": "^1.2",
+        "acdh-oeaw/arche-lib": "^2.0.0-alpha",
         "zozlak/logging": "^0.1.1"
     },
     "autoload": {
         "psr-4": {
             "acdhOeaw\\": "src/acdhOeaw"
         }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "*"
     }
 }

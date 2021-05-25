@@ -42,6 +42,10 @@ class Text implements HandlerInterface {
         
     }
 
+    /**
+     * 
+     * @return array<string>
+     */
     public function getHandledMimeTypes(): array {
         return ['application/json', 'application/vnd.geo+json', 'application/xml',
             'text/xml', 'text/plain'];
@@ -52,7 +56,7 @@ class Text implements HandlerInterface {
     }
 
     public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path) {
+                                    int $height, string $path): void {
         $srcPath   = $resource->getMeta()->url;
         $srcHandle = fopen($srcPath, 'r');
         $nLines    = max($resource->getConfig('textMinLines'), $height / $resource->getConfig('textLineHeight'));

@@ -43,6 +43,10 @@ class Fallback implements HandlerInterface {
         
     }
 
+    /**
+     * 
+     * @return array<string>
+     */
     public function getHandledMimeTypes(): array {
         return [];
     }
@@ -52,7 +56,7 @@ class Fallback implements HandlerInterface {
     }
 
     public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path) {
+                                    int $height, string $path): void {
         // upscaling for nice font rendering in low resolution
 	$upscale = 400 / min($width, $height);
         $upscale = $upscale <= 1 ? 1 : ceil($upscale);

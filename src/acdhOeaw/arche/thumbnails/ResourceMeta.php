@@ -69,6 +69,10 @@ class ResourceMeta {
      */
     public $realUrl;
 
+    /**
+     * 
+     * @param array<string, mixed> $data
+     */
     public function __construct(array $data = null) {
         if (is_iterable($data)) {
             foreach ($data as $k => $v) {

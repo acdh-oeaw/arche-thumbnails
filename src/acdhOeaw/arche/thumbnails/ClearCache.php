@@ -42,6 +42,10 @@ class ClearCache {
     const BY_MOD_TIME = 1;
     const BY_SIZE     = 2;
 
+    /**
+     * 
+     * @var string
+     */
     private $dir;
 
     /**
@@ -60,7 +64,7 @@ class ClearCache {
      *   - `ClearCache::BY_SIZE` - biggest
      * @throws BadMethodCallException
      */
-    public function clean(int $maxSizeMb, int $mode) {
+    public function clean(int $maxSizeMb, int $mode): void {
         if (!in_array($mode, [self::BY_MOD_TIME, self::BY_SIZE])) {
             throw new BadMethodCallException('unknown mode parameter value');
         }

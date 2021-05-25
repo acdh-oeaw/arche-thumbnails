@@ -51,7 +51,7 @@ interface ResourceInterface {
      *
      * @param string $property configuration property name
      */
-    public function getConfig(string $property);
+    public function getConfig(string $property): mixed;
 
     /**
      * List files cached for a resource.
@@ -61,7 +61,7 @@ interface ResourceInterface {
      * are encoded as strings left-padded with zeros up to 5 digits length.
      *
      * @param int $order \SCANDIR_SORT_ASCENDING or SCANDIR_SORT_DESCENDING
-     * @return array
+     * @return array<string, array<string>>
      */
     public function getCachedFiles(int $order): array;
 }

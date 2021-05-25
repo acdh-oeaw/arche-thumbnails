@@ -40,7 +40,7 @@ interface HandlerInterface {
     /**
      * Returns a list of handled mime types.
      * 
-     * @return array
+     * @return array<string>
      */
     public function getHandledMimeTypes(): array;
 
@@ -62,5 +62,5 @@ interface HandlerInterface {
      * @param string $path
      */
     public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path);
+                                    int $height, string $path): void;
 }
