@@ -4,7 +4,7 @@
         "zozlak/util": "^1.5",
         "acdh-oeaw/arche-lib": "^2.0.0",
         "zozlak/logging": "^0.1.1",
-        "sweetrdf/quick-rdf-io": "dev-master",
+        "sweetrdf/quick-rdf-io": "*",
         "sweetrdf/quick-rdf": "*",
         "sweetrdf/term-templates": "*"
     },
