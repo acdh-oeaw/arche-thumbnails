@@ -29,9 +29,15 @@ namespace acdhOeaw\arche\thumbnails;
 use DateTime;
 use Throwable;
 use PDO;
-use EasyRdf\Graph;
+use quickRdf\DataFactory as DF;
+use quickRdf\Dataset;
+use quickRdfIo\NQuadsParser;
+use quickRdfIo\RdfIoException;
+use termTemplates\QuadTemplate as QT;
+use termTemplates\DatasetExtractors as DE;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\StreamWrapper;
 use GuzzleHttp\Exception\RequestException;
 use acdhOeaw\arche\lib\RepoResourceInterface;
 use acdhOeaw\arche\lib\SearchTerm;
@@ -320,6 +326,7 @@ class Resource implements ResourceInterface {
         if (empty($this->meta->checkDate) || $diff > $this->config->get('cacheKeepAlive')) {
             Logger::info("\tfetching fresh metadata from the repository ($diff s)");
 
+            $parser  = new NQuadsParser(new DF(), false, NQuadsParser::MODE_TRIPLES);
             $meta    = null;
             $realUrl = $this->resolveUrl($this->url);
             $realUrl = preg_replace('|/metadata|', '', $realUrl);
@@ -337,11 +344,12 @@ class Resource implements ResourceInterface {
             try {
                 $resp = self::$client->send(new Request('GET', $searchUrl, $headers));
                 if ($resp->getStatusCode() === 200) {
-                    $graph = new Graph();
-                    $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
-                    $meta  = $graph->resourcesMatching($this->config->get('archeSearchMatchProp'))[0] ?? null;
-                    if ($meta !== null) {
-                        $realUrl = $meta->getUri();
+                    $meta     = new Dataset();
+                    $meta->add($parser->parseStream(StreamWrapper::getResource($resp->getBody())));
+                    $matchSbj = DE::getSubject($meta, new QT(null, DF::namedNode($this->config->get('archeSearchMatchProp'))));
+                    if ($matchSbj !== null) {
+                        $meta->deleteExcept(new QT($matchSbj));
+                        $realUrl = DE::getSubjectValue($meta);
                         Logger::info("\t\tthumbnail pointing to the resource found");
                     }
                 }
@@ -354,24 +362,27 @@ class Resource implements ResourceInterface {
                 try {
                     $resp = self::$client->send(new Request('GET', $realUrl . '/metadata', $headers));
                     if ($resp->getStatusCode() === 200) {
-                        $graph = new Graph();
-                        $graph->parse($resp->getBody(), $resp->getHeader('Content-Type')[0] ?? '');
-                        $meta  = $graph->resource($realUrl);
+                        $meta = new Dataset();
+                        $meta->add($parser->parseStream(StreamWrapper::getResource($resp->getBody())));
                         Logger::info("\t\tusing resource itself");
                     }
                 } catch (RequestException $e) {
                     
-                } catch (\EasyRdf\Exception $e) {
+                } catch (RdfIoException $e) {
                     
                 }
             }
 
-            $this->meta = new ResourceMeta([
+            $hashProp    = DF::namedNode($this->config->get('archeHashProp'));
+            $modDateProp = DF::namedNode($this->config->get('archeModDateProp'));
+            $mimeProp    = DF::namedNode($this->config->get('archeMimeProp'));
+            $sizeProp    = DF::namedNode($this->config->get('archeSizeProp'));
+            $this->meta  = new ResourceMeta([
                 'url'       => $this->url,
                 'checkDate' => new DateTime(),
-                'repoHash'  => (string) ($meta->getLiteral($this->config->get('archeHashProp')) ?? $meta->getLiteral($this->config->get('archeModDateProp'))),
-                'mime'      => (string) $meta->getLiteral($this->config->get('archeMimeProp')),
-                'sizeMb'    => round((int) ((string) $meta->getLiteral($this->config->get('archeSizeProp'))) / 1024 / 1024),
+                'repoHash'  => (string) DE::getObjectValue($meta, new QT(null, $hashProp)) ?? DE::getObjectValue($meta, new QT(null, $modDateProp)),
+                'mime'      => (string) DE::getObjectValue($meta, new QT(null, $mimeProp)),
+                'sizeMb'    => round((int) DE::getObjectValue($meta, new QT(null, $sizeProp)) / 1024 / 1024),
                 'realUrl'   => $realUrl,
             ]);
 
