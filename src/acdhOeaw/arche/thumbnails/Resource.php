@@ -53,7 +53,7 @@ class Resource implements ResourceInterface {
 
     /**
      *
-     * @var \GuzzleHttp\Client;
+     * @var Client;
      */
     static private $client;
 
