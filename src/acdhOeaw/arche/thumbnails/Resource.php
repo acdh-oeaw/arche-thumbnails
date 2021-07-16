@@ -141,7 +141,7 @@ class Resource implements ResourceInterface {
     public function getThumbnail(int $width = 0, int $height = 0): string {
         $path = $this->getFilePath($width, $height);
         if (file_exists($path)) {
-            Logger::info("\tfound in cache");
+            Logger::info("\tfound in cache ($path)");
         }
         $dir = dirname($path);
 
@@ -351,6 +351,8 @@ class Resource implements ResourceInterface {
                         $meta->deleteExcept(new QT($matchSbj));
                         $realUrl = DE::getSubjectValue($meta);
                         Logger::info("\t\tthumbnail pointing to the resource found");
+                    } else {
+                        $meta = null;
                     }
                 }
             } catch (RequestException $e) {
@@ -367,9 +369,9 @@ class Resource implements ResourceInterface {
                         Logger::info("\t\tusing resource itself");
                     }
                 } catch (RequestException $e) {
-                    
+                    Logger::error("\t\tRequestException while fetching resource metadata: " . $e->getMessage());
                 } catch (RdfIoException $e) {
-                    
+                    Logger::error("\t\tRdfIoException while parsing resource metadata:" . $e->getMessage());
                 }
             }
 
