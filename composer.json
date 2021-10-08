@@ -1,4 +1,15 @@
 {
+    "name": "acdh-oeaw/arche-thumbnails",
+    "description": "Thumbnails service for the ARCHE Suite",
+    "keywords": [],
+    "homepage": "https://github.com/acdh-oeaw/arche-thumbnails",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mateusz Żółtak",
+            "email": "mzoltak@oeaw.ac.at"
+        }
+    ],
     "require": {
         "guzzlehttp/guzzle": "^7",
         "zozlak/util": "^1.5",
