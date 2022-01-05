@@ -1,9 +1,19 @@
 {
+    "name": "acdh-oeaw/arche-thumbnails",
+    "description": "Thumbnails service for the ARCHE Suite",
+    "keywords": [],
+    "homepage": "https://github.com/acdh-oeaw/arche-thumbnails",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mateusz Żółtak",
+            "email": "mzoltak@oeaw.ac.at"
+        }
+    ],
     "require": {
         "guzzlehttp/guzzle": "^7",
         "zozlak/util": "^1.5",
-        "zozlak/rdf-constants": "^1",
-        "acdh-oeaw/arche-lib": "^2.0.0",
+        "acdh-oeaw/arche-lib": ">=2 <5",
         "zozlak/logging": "^0.1.1",
         "sweetrdf/quick-rdf-io": "*",
         "sweetrdf/quick-rdf": "*",
