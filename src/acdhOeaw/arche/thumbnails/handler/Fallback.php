@@ -66,7 +66,8 @@ class Fallback implements HandlerInterface {
         // sanitize the mime type
         $mime = $resource->getMeta()->mime;
         if (empty($mime)) {
-            $mime = 'Collection';
+            $mime = $resource->getMeta()->class ?? 'Collection';
+            $mime = preg_replace('`^.*[/#]`', '', $mime);
         }
         $mime = explode('/', $mime);
         if (count($mime) > 1) {

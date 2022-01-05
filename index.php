@@ -59,3 +59,4 @@ $path = $res->getThumbnail($width, $height);
 header('Content-Type: image/png');
 header('Content-Size: ' . filesize($path));
 readfile($path);
+

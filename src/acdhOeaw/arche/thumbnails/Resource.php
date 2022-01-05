@@ -42,6 +42,7 @@ use GuzzleHttp\Exception\RequestException;
 use acdhOeaw\arche\lib\RepoResourceInterface;
 use acdhOeaw\arche\lib\SearchTerm;
 use zozlak\util\Config;
+use zozlak\RdfConstants as RDF;
 use zozlak\logging\Logger;
 
 /**
@@ -303,12 +304,13 @@ class Resource implements ResourceInterface {
                 check_date AS 'checkDate', 
                 repo_hash AS 'repoHash', 
                 mime, size_mb AS 'sizeMb', 
-                real_url AS 'realUrl' 
+                real_url AS 'realUrl',
+                class
             FROM resources 
             WHERE url = ?
         ");
         $query->execute([$this->url]);
-        $tmp   = $query->fetchObject('\\acdhOeaw\\arche\\thumbnails\\ResourceMeta');
+        $tmp   = $query->fetchObject(ResourceMeta::class);
         if ($tmp !== false) {
             $this->meta            = $tmp;
             $this->meta->checkDate = new DateTime($this->meta->checkDate);
@@ -379,6 +381,7 @@ class Resource implements ResourceInterface {
             $modDateProp = DF::namedNode($this->config->get('archeModDateProp'));
             $mimeProp    = DF::namedNode($this->config->get('archeMimeProp'));
             $sizeProp    = DF::namedNode($this->config->get('archeSizeProp'));
+            $classProp   = DF::namedNode(RDF::RDF_TYPE);
             $this->meta  = new ResourceMeta([
                 'url'       => $this->url,
                 'checkDate' => new DateTime(),
@@ -386,17 +389,18 @@ class Resource implements ResourceInterface {
                 'mime'      => (string) DE::getObjectValue($meta, new QT(null, $mimeProp)),
                 'sizeMb'    => round((int) DE::getObjectValue($meta, new QT(null, $sizeProp)) / 1024 / 1024),
                 'realUrl'   => $realUrl,
+                'class'     => (string) DE::getObjectValue($meta, new QT(null, $classProp)),
             ]);
 
             if (empty($oldMeta->checkDate)) {
                 $query = $this->pdo->prepare("
-                    INSERT INTO resources (check_date, repo_hash, mime, size_mb, real_url, url)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO resources (check_date, repo_hash, mime, size_mb, real_url, class, url)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                 ");
             } else {
                 $query = $this->pdo->prepare("
                     UPDATE resources 
-                    SET check_date = ?, repo_hash = ?, mime = ?, size_mb = ?, real_url = ?
+                    SET check_date = ?, repo_hash = ?, mime = ?, size_mb = ?, real_url = ?, class = ?
                     WHERE url = ?
                 ");
             }
@@ -406,6 +410,7 @@ class Resource implements ResourceInterface {
                 $this->meta->mime,
                 $this->meta->sizeMb,
                 $this->meta->realUrl,
+                $this->meta->class,
                 $this->url,
             ];
             $query->execute($param);
@@ -438,7 +443,8 @@ class Resource implements ResourceInterface {
                 repo_hash timestamp not null,
                 mime text not null,
                 size_mb int not null,
-                real_url text not null
+                real_url text not null,
+                class text not null
             )
         ");
     }
