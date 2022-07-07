@@ -26,3 +26,14 @@ textMinLines=3
 textMargin=0.05
 fallbackStrokeWidth=0.02
 fallbackFontWeight=600
+fallbackFontColor='#8CD3D8'
+fallbackLabelMinLength=10
+fallbackMap['Place']='/var/www/html/assets/arche_place.svg'
+fallbackMap['Person']='/var/www/html/assets/arche_person.svg'
+fallbackMap['Organisation']='/var/www/html/assets/arche_organisation.svg'
+fallbackImage='/var/www/html/assets/arche_resource.svg'
+fallbackX=0.5
+fallbackY=0.7
+fallbackWidth=0.6
+fallbackHeight=0.2
+

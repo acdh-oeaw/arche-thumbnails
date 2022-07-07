@@ -57,6 +57,7 @@ class Image implements HandlerInterface {
                                     int $height, string $path): void {
         $srcPath   = $resource->getResourcePath();
         $src       = new Imagick();
+        $src->setBackgroundColor(new ImagickPixel('transparent'));
         $src->readImage($srcPath);
         $ratio     = $src->getImageWidth() / $src->getImageHeight();
         $width     = $width > 0 ? $width : $height * $ratio;

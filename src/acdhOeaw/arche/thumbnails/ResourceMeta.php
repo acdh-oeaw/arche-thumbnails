@@ -70,6 +70,12 @@ class ResourceMeta {
     public $realUrl;
 
     /**
+     *
+     * @var string
+     */
+    public $class;
+
+    /**
      * 
      * @param array<string, mixed> $data
      */
