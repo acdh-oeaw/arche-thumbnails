@@ -51,11 +51,7 @@ use zozlak\logging\Logger;
  */
 class Resource implements ResourceInterface {
 
-    /**
-     *
-     * @var Client;
-     */
-    static private $client;
+    static private Client $client;
 
     static private function resolveUrl(string $url): string {
         if (self::$client === null) {
