@@ -13,7 +13,7 @@
     "require": {
         "guzzlehttp/guzzle": "^7",
         "zozlak/util": "^1.5",
-        "acdh-oeaw/arche-lib": ">=2 <5",
+        "acdh-oeaw/arche-lib": ">=2 <6",
         "zozlak/logging": "^0.1.1",
         "sweetrdf/quick-rdf-io": "*",
         "sweetrdf/quick-rdf": "*",
