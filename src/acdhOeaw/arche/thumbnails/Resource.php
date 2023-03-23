@@ -55,7 +55,7 @@ class Resource implements ResourceInterface {
     static private Client $client;
 
     static private function resolveUrl(string $url): string {
-        if (self::$client === null) {
+        if (!isset(self::$client)) {
             self::$client = new Client([
                 'allow_redirects' => ['track_redirects' => true],
                 'verify'          => false
