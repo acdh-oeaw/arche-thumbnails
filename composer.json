@@ -14,10 +14,10 @@
         "guzzlehttp/guzzle": "^7",
         "zozlak/util": "^1.5",
         "acdh-oeaw/arche-lib": ">=2 <6",
-        "zozlak/logging": "^0.1.1",
-        "sweetrdf/quick-rdf-io": "*",
-        "sweetrdf/quick-rdf": "*",
-        "sweetrdf/term-templates": "*"
+        "zozlak/logging": "^1",
+        "sweetrdf/quick-rdf-io": "^1",
+        "sweetrdf/quick-rdf": "^1",
+        "sweetrdf/term-templates": "^1"
     },
     "autoload": {
         "psr-4": {
