@@ -344,10 +344,10 @@ class Resource implements ResourceInterface {
                 if ($resp->getStatusCode() === 200) {
                     $meta     = new Dataset();
                     $meta->add($parser->parseStream(StreamWrapper::getResource($resp->getBody())));
-                    $matchSbj = DE::getSubject($meta, new QT(null, DF::namedNode($this->config->get('archeSearchMatchProp'))));
-                    if ($matchSbj !== null) {
-                        $meta->deleteExcept(new QT($matchSbj));
-                        $realUrl = DE::getSubjectValue($meta);
+                    $match = $meta->copy(new QT(null, DF::namedNode($this->config->get('archeSearchMatchProp'))));
+                    if (count($match) > 0) {
+                        $meta->deleteExcept(new QT($match[0]->getSubject()));
+                        $realUrl = DE::getSubjectValue($match);
                         Logger::info("\t\tthumbnail pointing to the resource found");
                     } else {
                         $meta = null;
