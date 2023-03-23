@@ -232,7 +232,7 @@ class Resource implements ResourceInterface {
         }
 
         $files = [];
-        foreach (scandir($dir, $order) as $i) {
+        foreach (scandir($dir, $order) ?: [] as $i) {
             $i = explode('_', $i);
             if (count($i) > 1) {
                 $w = sprintf('%05d', $i[0]);
@@ -278,10 +278,10 @@ class Resource implements ResourceInterface {
         }
 
         $chunk = 10 ^ 6; // 1 MB
-        $fin   = fopen($this->meta->realUrl, 'r');
-        $fout  = fopen($path, 'w');
+        $fin   = fopen($this->meta->realUrl, 'r') ?: throw new NoSuchFileException();
+        $fout  = fopen($path, 'w') ?: throw new NoSuchFileException();
         while (!feof($fin)) {
-            fwrite($fout, fread($fin, $chunk));
+            fwrite($fout, (string) fread($fin, $chunk));
         }
         fclose($fin);
         fclose($fout);
@@ -327,10 +327,10 @@ class Resource implements ResourceInterface {
             $parser  = new NQuadsParser(new DF(), false, NQuadsParser::MODE_TRIPLES);
             $meta    = null;
             $realUrl = $this->resolveUrl($this->url);
-            $realUrl = preg_replace('|/metadata|', '', $realUrl);
+            $realUrl = (string) preg_replace('|/metadata|', '', $realUrl);
 
             // try to find thumbnail pointing to the resource
-            $baseUrl   = substr($realUrl, 0, strrpos($realUrl, '/'));
+            $baseUrl   = substr($realUrl, 0, (int) strrpos($realUrl, '/'));
             $searchUrl = $baseUrl . '/search' .
                 '?property[0]=' . urlencode($this->config->get('archeTitleImageProp')) .
                 '&value[0]=' . urlencode($this->url) .
@@ -419,7 +419,7 @@ class Resource implements ResourceInterface {
         $dir = dirname($this->getFilePath());
         if ($oldMeta->repoHash !== $this->meta->repoHash && is_dir($dir)) {
             Logger::info("\tresource has changed - removing local cache");
-            foreach (scandir($dir) as $i) {
+            foreach (scandir($dir) ?: [] as $i) {
                 $path = $dir . '/' . $i;
                 if (is_file($path)) {
                     unlink($path);

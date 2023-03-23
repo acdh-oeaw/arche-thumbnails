@@ -93,7 +93,7 @@ class ClearCache {
             while ($sizeSum > $maxSizeMb && count($files) > 0) {
                 $file = array_pop($files);
                 echo "removing $file \n";
-                unlink($file);
+                unlink((string) $file);
                 $sizeSum -= $bySize[$file];
             }
         }
@@ -101,7 +101,7 @@ class ClearCache {
         // remove empty directories
         $dirIter = new DirectoryIterator($this->dir);
         foreach($dirIter as $i){
-            if (!$i->isDot() && count(scandir($i->getPathname())) === 2) {
+            if (!$i->isDot() && count(scandir($i->getPathname()) ?: []) === 2) {
                 rmdir($i->getPathname());
             }
         }

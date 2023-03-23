@@ -63,7 +63,7 @@ class Fallback implements HandlerInterface {
             $mime = $resource->getMeta()->class ?? 'Collection';
             $mime = preg_replace('`^.*[/#]`', '', $mime);
         }
-        $mime = explode('/', $mime);
+        $mime = explode('/', (string) $mime);
         if (count($mime) > 1) {
             $mime = $mime[1];
         } else {
@@ -124,13 +124,13 @@ class Fallback implements HandlerInterface {
         $textColor = new ImagickPixel($textColor);
         $availWidth = $srcWidth * $lw;
         $draw->setFontSize(floor($drawHeight));
-        $draw->setFontWeight($textWeight);
-        $this->findFontSize($src, $draw, $availWidth, $label, $labelMinLen);
+        $draw->setFontWeight((int) round($textWeight));
+        $textHeight = $this->findFontSize($src, $draw, $availWidth, $label, $labelMinLen);
         // draw the text
         $draw->setStrokeWidth(0);
         $draw->setFillColor($textColor);
         $draw->setTextAlignment(Imagick::ALIGN_CENTER);
-        $draw->annotation($srcWidth * $lx, $srcHeight * $ly + ($drawHeight - $textGeom['textHeight']) / 2, $label);
+        $draw->annotation($srcWidth * $lx, $srcHeight * $ly + ($drawHeight - $textHeight) / 2, $label);
         $src->drawImage($draw);
 
         // rescale
@@ -149,7 +149,7 @@ class Fallback implements HandlerInterface {
         return $trgt;
     }
 
-    private function findFontSize(Imagick $img, ImagickDraw $draw, int $availWidth, string $label, int $labelMinLen): void {
+    private function findFontSize(Imagick $img, ImagickDraw $draw, float $availWidth, string $label, int $labelMinLen): float  {
         $draw->setTextAlignment(Imagick::ALIGN_LEFT);
         $textGeom = $img->queryFontMetrics($draw, $label);
         while ($textGeom['textWidth'] > $availWidth) {
@@ -160,18 +160,19 @@ class Fallback implements HandlerInterface {
             }
             $textGeom = $img->queryFontMetrics($draw, $label);
         }
+        return $textGeom['textHeight'];
     }
 
     private function createGeneric(string $label, int $width, int $height, float $strokeWidth, string $textColor, int $textWeight, int $labelMinLen): Imagick {
         // upscaling for nice font rendering in low resolution
-	$upscale = 400 / min($width, $height);
+        $upscale = 400 / min($width, $height);
         $upscale = $upscale <= 1 ? 1 : ceil($upscale);
         $width   *= $upscale;
         $height  *= $upscale;
 
         // Imagick initialization
         $trgt = new Imagick();
-        $trgt->newImage($width, $height, new ImagickPixel('transparent'));
+        $trgt->newImage((int) round($width), (int) round($height), new ImagickPixel('transparent'));
 
         $draw  = new ImagickDraw();
         $white = new ImagickPixel($textColor);
@@ -222,17 +223,17 @@ class Fallback implements HandlerInterface {
         $draw->setFontSize(round($bandHeight / 2));
         $draw->setTextAlignment(Imagick::ALIGN_LEFT);
         $draw->setFontWeight($textWeight);
-        $this->findFontSize($trgt, $draw, $bandWidth * 0.8, $label, $labelMinLen);
+        $textHeight = $this->findFontSize($trgt, $draw, $bandWidth * 0.8, $label, $labelMinLen);
         // draw the text
         $draw->setStrokeWidth(0);
         $draw->setFillColor($white);
         $draw->setTextAlignment(Imagick::ALIGN_CENTER);
-        $draw->annotation($bandX1 + $bandWidth * 0.5, $bandY1 + ($bandHeight - $textGeom['textHeight']) / 1.5 + $textGeom['textHeight'], $label);
+        $draw->annotation($bandX1 + $bandWidth * 0.5, $bandY1 + ($bandHeight - $textHeight) / 1.5 + $textHeight, $label);
 
         // output
         $trgt->drawImage($draw);
 
-        $trgt->resizeImage($width / $upscale, $height / $upscale, Imagick::FILTER_LANCZOS, 1, true); 
+        $trgt->resizeImage((int) round($width / $upscale), (int) round($height / $upscale), Imagick::FILTER_LANCZOS, 1, true); 
         return $trgt;
     }
 

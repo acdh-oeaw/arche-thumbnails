@@ -30,6 +30,7 @@ use Imagick;
 use ImagickDraw;
 use ImagickPixel;
 use acdhOeaw\arche\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\NoSuchFileException;
 
 /**
  * Creates the resource thumbnail by plotting first few lines of a resource content.
@@ -58,7 +59,7 @@ class Text implements HandlerInterface {
     public function createThumbnail(ResourceInterface $resource, int $width,
                                     int $height, string $path): void {
         $srcPath   = $resource->getMeta()->url;
-        $srcHandle = fopen($srcPath, 'r');
+        $srcHandle = fopen($srcPath, 'r') ?: throw new NoSuchFileException();
         $nLines    = max($resource->getConfig('textMinLines'), $height / $resource->getConfig('textLineHeight'));
         $lines     = [];
         while (count($lines) < $nLines) {
@@ -72,7 +73,7 @@ class Text implements HandlerInterface {
         $draw       = new ImagickDraw();
         $draw->setFontSize($lineHeight * 0.75);
         foreach ($lines as $n => $l) {
-            $draw->annotation(5, $y + round(($n + 1) * $lineHeight), $l);
+            $draw->annotation(5, $y + round(($n + 1) * $lineHeight), (string) $l);
         }
 
         $trgt = new Imagick();
