@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 900 900" style="enable-background:new 0 0 900 900;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;stroke:#8CD3D8;stroke-width:25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#8CD3D8;stroke-width:25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st2{fill:#8CD3D8;}
+</style>
+<g id="publication">
+	<path class="st0" d="M26.3,191.2c-4.2,206.9-4.2,416.5,0,588.3c46.1,37.7,211.9-60.1,423.8,0c192.9-66.4,382.8,46.1,421.6,0
+		c5.3-297.6-3.1-364.6,0-588.3c-28.2-69.7-152.8-91.7-421.6,0C231.7,96.4,72.4,135.2,26.3,191.2z"/>
+	<line class="st1" x1="450" y1="188.1" x2="450" y2="776.4"/>
+	<path class="st2" d="M558.6,466.4c0,0,0.6-253.6,0-272s-8.6-85.4,38-82.2C639,112,634,112,662,111c27,0,45,0,42.1,108.7
+		c-4.2,139.1,0.2,310.5,0.2,310.5l-73.1-63.8l-72.6,63.3V466.4z"/>
+</g>
+</svg>

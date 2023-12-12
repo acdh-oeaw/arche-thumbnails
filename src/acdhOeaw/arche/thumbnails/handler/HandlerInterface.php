@@ -34,8 +34,8 @@ use acdhOeaw\arche\thumbnails\ResourceInterface;
  * @author zozlak
  */
 interface HandlerInterface {
-
-    public function __construct();
+    
+    public function __construct(object $config);
 
     /**
      * Returns a list of handled mime types.

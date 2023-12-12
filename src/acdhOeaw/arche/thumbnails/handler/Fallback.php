@@ -39,8 +39,10 @@ use acdhOeaw\arche\thumbnails\ResourceInterface;
  */
 class Fallback implements HandlerInterface {
 
-    public function __construct() {
-        
+    private object $config;
+
+    public function __construct(object $config) {
+        $this->config = $config;
     }
 
     /**
@@ -70,20 +72,20 @@ class Fallback implements HandlerInterface {
             $mime = $mime[0];
         }
         // check if we can use an icon
-        $map = $resource->getConfig('fallbackMap');
-        if (isset($map[$mime])) {
-            $img = $this->createFromMap($map[$mime], $width, $height);
+        $map = $this->config->classMap;
+        if (isset($map->$mime)) {
+            $img = $this->createFromMap($map->$mime, $width, $height);
         } else {
-            $imgPath = $resource->getConfig('fallbackImage');
-            $tc      = $resource->getConfig('fallbackFontColor');
-            $tw      = $resource->getConfig('fallbackFontWeight');
-            $ml      = $resource->getConfig('fallbackLabelMinLength');
-            $sw      = $resource->getConfig('fallbackStrokeWidth');
+            $imgPath = $this->config->defaultImage;
+            $tc      = $this->config->fontColor;
+            $tw      = $this->config->fontWeight;
+            $ml      = $this->config->labelMinLength;
+            $sw      = $this->config->strokeWidth;
             if ($imgPath !== null) {
-                $x   = $resource->getConfig('fallbackX');
-                $y   = $resource->getConfig('fallbackY');
-                $lw  = $resource->getConfig('fallbackWidth');
-                $lh  = $resource->getConfig('fallbackHeight');
+                $x   = $this->config->x;
+                $y   = $this->config->y;
+                $lw  = $this->config->width;
+                $lh  = $this->config->height;
                 $img = $this->createFromTemplate($mime, $width, $height, $imgPath, $x, $y, $lw, $lh, $tc, $tw, $ml);
             } else {
                 $img = $this->createGeneric($mime, $width, $height, $sw, $tc, $tw, $ml);
@@ -111,7 +113,10 @@ class Fallback implements HandlerInterface {
         return $trgt;
     }
 
-    private function createFromTemplate(string $label, int $width, int $height, string $tmplPath, float $lx, float $ly, float $lw, float $lh, string $textColor, float $textWeight, int $labelMinLen): Imagick {
+    private function createFromTemplate(string $label, int $width, int $height,
+                                        string $tmplPath, float $lx, float $ly,
+                                        float $lw, float $lh, string $textColor,
+                                        float $textWeight, int $labelMinLen): Imagick {
         $src       = new Imagick();
         $src->setBackgroundColor(new ImagickPixel('transparent'));
         $src->readImage($tmplPath);
@@ -119,9 +124,9 @@ class Fallback implements HandlerInterface {
         $srcHeight = $src->getImageHeight();
 
         // print the label on the original thumbnail
-        $draw  = new ImagickDraw();
+        $draw       = new ImagickDraw();
         $drawHeight = $srcHeight * $lh;
-        $textColor = new ImagickPixel($textColor);
+        $textColor  = new ImagickPixel($textColor);
         $availWidth = $srcWidth * $lw;
         $draw->setFontSize(floor($drawHeight));
         $draw->setFontWeight((int) round($textWeight));
@@ -149,7 +154,9 @@ class Fallback implements HandlerInterface {
         return $trgt;
     }
 
-    private function findFontSize(Imagick $img, ImagickDraw $draw, float $availWidth, string $label, int $labelMinLen): float  {
+    private function findFontSize(Imagick $img, ImagickDraw $draw,
+                                  float $availWidth, string $label,
+                                  int $labelMinLen): float {
         $draw->setTextAlignment(Imagick::ALIGN_LEFT);
         $textGeom = $img->queryFontMetrics($draw, $label);
         while ($textGeom['textWidth'] > $availWidth) {
@@ -163,7 +170,9 @@ class Fallback implements HandlerInterface {
         return $textGeom['textHeight'];
     }
 
-    private function createGeneric(string $label, int $width, int $height, float $strokeWidth, string $textColor, int $textWeight, int $labelMinLen): Imagick {
+    private function createGeneric(string $label, int $width, int $height,
+                                   float $strokeWidth, string $textColor,
+                                   int $textWeight, int $labelMinLen): Imagick {
         // upscaling for nice font rendering in low resolution
         $upscale = 400 / min($width, $height);
         $upscale = $upscale <= 1 ? 1 : ceil($upscale);
@@ -233,8 +242,7 @@ class Fallback implements HandlerInterface {
         // output
         $trgt->drawImage($draw);
 
-        $trgt->resizeImage((int) round($width / $upscale), (int) round($height / $upscale), Imagick::FILTER_LANCZOS, 1, true); 
+        $trgt->resizeImage((int) round($width / $upscale), (int) round($height / $upscale), Imagick::FILTER_LANCZOS, 1, true);
         return $trgt;
     }
-
 }

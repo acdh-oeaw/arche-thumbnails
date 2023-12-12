@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 900 900" style="enable-background:new 0 0 900 900;" xml:space="preserve">
+<style type="text/css">
+	.st6{fill:#8CD3D8;}
+	.st7{fill:none;stroke:#8CD3D8;stroke-width:25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+</style>
+<g id="organisation">
+	<ellipse class="st6" cx="145.5" cy="500" rx="64.1" ry="70.5"/>
+	<path class="st6" d="M142.1,559.5c-45.5,0-84,30-97.1,71.4c26.4,25.3,60.8,40.7,98.6,40.7c36.7,0,70.3-14.5,96.3-38.6
+		C227.5,590.5,188.4,559.5,142.1,559.5z"/>
+	<ellipse class="st6" cx="768.5" cy="496.2" rx="64.1" ry="70.5"/>
+	<path class="st6" d="M765.2,555.7c-45.5,0-84,30-97.1,71.4c26.4,25.3,60.8,40.7,98.6,40.7c36.7,0,70.3-14.5,96.3-38.6
+		C850.6,586.7,811.5,555.7,765.2,555.7z"/>
+	<ellipse class="st6" cx="455.3" cy="281.6" rx="64.1" ry="70.5"/>
+	<path class="st6" d="M451.9,341.1c-45.5,0-84,30-97.1,71.4c26.4,25.3,60.8,40.7,98.6,40.7c36.7,0,70.3-14.5,96.3-38.6
+		C537.3,372.1,498.2,341.1,451.9,341.1z"/>
+	<path class="st7" d="M162.6,366c29.4-42.1,74.5-77,129.4-100.3"/>
+	<path class="st7" d="M620.2,692.3c-49.6,22.9-107.9,36.1-170.3,36.1c-58.1,0-112.6-11.4-159.9-31.5"/>
+	<path class="st7" d="M612,268.7c58.6,18.7,108.5,50,143.8,89.3"/>
+</g>
+</svg>

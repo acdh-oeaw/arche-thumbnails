@@ -1,0 +1,51 @@
+db: sqlite:db.sqlite
+baseUrl: /
+schema:
+  idPrefix: https://
+  nmsp: https://vocabs.acdh.oeaw.ac.at/schema#
+  modDate: https://vocabs.acdh.oeaw.ac.at/schema#hasUpdatedDate
+  mime: https://vocabs.acdh.oeaw.ac.at/schema#hasFormat
+  size: https://vocabs.acdh.oeaw.ac.at/schema#hasRawBinarySize
+  hash: https://vocabs.acdh.oeaw.ac.at/schema#hasHash
+  titleImage: https://vocabs.acdh.oeaw.ac.at/schema#isTitleImageOf
+  searchMatch: search://match
+  metaFetchHeader: X-METADATA-READ-MODE
+defaultWidth: 100
+defaultHeight: 100
+log:
+  file: log
+  level: info
+cache:
+  dir: /var/www/html/cache
+  keepAlive: 60
+  maxFileSizeMb: 100
+  maxSizeMb: 2000
+  clearMode: size # 'size' or 'time'
+mimeHandlers:
+  - class: \acdhOeaw\arche\thumbnails\handler\Text
+    config:
+      lineHeight: 25
+      minLines: 3
+      margin: 0.05
+  - class: \acdhOeaw\arche\thumbnails\handler\Image
+    config: ~
+  - class: \acdhOeaw\arche\thumbnails\handler\Fallback
+    config:
+      strokeWidth: 0.02
+      fontWeight: 600
+      fontColor: "#8CD3D8"
+      labelMinLength: 10
+      x: 0.5
+      y: 0.7
+      width: 0.6
+      height: 0.2
+      defaultImage: var/www/html/assets/arche_resource.svg
+      classMap:
+        Collection: /var/www/html/assets/arche_collection.svg
+        TopCollection: /var/www/html/assets/arche_topCollection.svg
+        Publication: /var/www/html/assets/arche_publication.svg
+        Metadata: /var/www/html/assets/arche_metadata.svg
+        Project: /var/www/html/assets/arche_project.svg
+        Place: /var/www/html/assets/arche_place.svg
+        Person: /var/www/html/assets/arche_person.svg
+        Organisation: /var/www/html/assets/arche_organisation.svg

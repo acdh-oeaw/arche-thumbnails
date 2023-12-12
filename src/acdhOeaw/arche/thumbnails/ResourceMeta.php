@@ -26,6 +26,8 @@
 
 namespace acdhOeaw\arche\thumbnails;
 
+use DateTimeImmutable;
+
 /**
  * Description of ResourceMeta
  *
@@ -33,58 +35,26 @@ namespace acdhOeaw\arche\thumbnails;
  */
 class ResourceMeta {
 
-    /**
-     *
-     * @var string
-     */
-    public $url;
+    public string $url;
 
     /**
-     *
-     * @var \DateTime
+     * 
+     * @var DateTimeImmutable
      */
     public $checkDate;
-
-    /**
-     *
-     * @var string
-     */
-    public $repoHash;
-
-    /**
-     *
-     * @var string
-     */
-    public $mime;
-
-    /**
-     *
-     * @var int
-     */
-    public $sizeMb;
-
-    /**
-     *
-     * @var string
-     */
-    public $realUrl;
-
-    /**
-     *
-     * @var string
-     */
-    public $class;
+    public string $repoHash = '';
+    public string $mime     = '';
+    public int $sizeMb   = 0;
+    public string $realUrl  = '';
+    public string $class    = '';
 
     /**
      * 
      * @param array<string, mixed> $data
      */
-    public function __construct(array $data = null) {
-        if (is_iterable($data)) {
-            foreach ($data as $k => $v) {
-                $this->$k = $v;
-            }
+    public function __construct(array $data = []) {
+        foreach ($data as $k => $v) {
+            $this->$k = $v;
         }
     }
-
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 900 900" style="enable-background:new 0 0 900 900;" xml:space="preserve">
+<style type="text/css">
+	.st5{fill:#FFFFFF;}
+	.st6{fill:#8CD3D8;}
+	.st7{fill:#FFFFFF;stroke:#8CD3D8;stroke-width:25;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+</style>
+<g id="project">
+	<g>
+		<g>
+			<path class="st5" d="M96,775.5c-30.3,0-55-18.4-55-40.9V173.4c0-22.6,24.7-40.9,55-40.9h708.5c30.3,0,55,18.4,55,40.9v561.1
+				c0,22.6-24.7,40.9-55,40.9H96z"/>
+			<path class="st6" d="M804.5,145c12.2,0,24,3.7,32.2,10.3c3.8,3,10.3,9.5,10.3,18.2v561.1c0,8.7-6.4,15.1-10.3,18.2
+				c-8.2,6.5-20,10.3-32.2,10.3H96c-12.2,0-24-3.7-32.2-10.3c-3.8-3-10.3-9.5-10.3-18.2V173.4c0-8.7,6.4-15.1,10.3-18.2
+				C72,148.7,83.8,145,96,145H804.5 M804.5,120H96c-37.3,0-67.5,23.9-67.5,53.4v561.1c0,29.5,30.2,53.4,67.5,53.4h708.5
+				c37.3,0,67.5-23.9,67.5-53.4V173.4C872,143.9,841.8,120,804.5,120L804.5,120z"/>
+		</g>
+		<polyline class="st7" points="651.9,317.8 709.1,366.9 774.5,285.1 		"/>
+		<line class="st7" x1="148.4" y1="329.3" x2="336.4" y2="329.3"/>
+		<line class="st7" x1="295.5" y1="427.5" x2="553.1" y2="427.5"/>
+		<line class="st7" x1="491.8" y1="623.7" x2="782.1" y2="623.7"/>
+		<line class="st7" x1="471.3" y1="525.6" x2="585.8" y2="525.6"/>
+	</g>
+</g>
+</svg>
+

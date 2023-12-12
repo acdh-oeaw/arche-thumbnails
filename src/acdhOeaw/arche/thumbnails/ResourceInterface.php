@@ -47,13 +47,6 @@ interface ResourceInterface {
     public function getResourcePath(): string;
 
     /**
-     * Returns a configuration property value stored in the config.ini file
-     *
-     * @param string $property configuration property name
-     */
-    public function getConfig(string $property): mixed;
-
-    /**
      * List files cached for a resource.
      * 
      * Returnes 2D array with first dimension indicating available widths and
@@ -65,4 +58,3 @@ interface ResourceInterface {
      */
     public function getCachedFiles(int $order): array;
 }
-

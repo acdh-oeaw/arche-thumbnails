@@ -24,7 +24,6 @@
  * THE SOFTWARE.
  */
 
-use zozlak\util\Config;
 use zozlak\logging\Log;
 use zozlak\logging\Logger;
 use acdhOeaw\arche\thumbnails\Resource;
@@ -34,24 +33,24 @@ header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
 $composer = require_once 'vendor/autoload.php';
 
-$config = new Config('config.ini');
+$config = json_decode(json_encode(yaml_parse_file('config.yaml')));
 
-Logger::addLog(new Log($config->get('logFile')), $config->get('logLevel'));
+Logger::addLog(new Log($config->log->file), $config->log->level);
 
 // extract ARCHE id from the request URL
 $url = filter_input(INPUT_GET, 'id');
 if (empty($url)) {
-    $url = substr($_SERVER['REDIRECT_URL'], strlen($config->get('baseUrl')));
+    $url = substr($_SERVER['REDIRECT_URL'], strlen($config->baseUrl));
     if (!preg_match('|^https?://|', $url)) {
-        $url = $config->get('archeIdPrefix') . $url;
+        $url = $config->schema->idPrefix . $url;
     }
 }
 
 $width  = filter_input(INPUT_GET, 'width') ?? 0;
 $height = filter_input(INPUT_GET, 'height') ?? 0;
 if ($width === 0 && $height === 0) {
-    $width  = $config->get('thumbnailDefaultWidth');
-    $height = $config->get('thumbnailDefaultHeight');
+    $width  = $config->defaultWidth;
+    $height = $config->defaultHeight;
 }
 
 $res   = new Resource($url, $config);

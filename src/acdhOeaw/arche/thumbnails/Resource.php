@@ -26,24 +26,24 @@
 
 namespace acdhOeaw\arche\thumbnails;
 
-use DateTime;
+use DateTimeImmutable;
 use Throwable;
 use PDO;
 use quickRdf\DataFactory as DF;
 use quickRdf\Dataset;
 use quickRdfIo\NQuadsParser;
 use quickRdfIo\RdfIoException;
+use termTemplates\PredicateTemplate as PT;
 use termTemplates\QuadTemplate as QT;
-use termTemplates\DatasetExtractors as DE;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\StreamWrapper;
 use GuzzleHttp\Exception\RequestException;
 use acdhOeaw\arche\lib\RepoResourceInterface;
 use acdhOeaw\arche\lib\SearchTerm;
-use zozlak\util\Config;
 use zozlak\RdfConstants as RDF;
 use zozlak\logging\Logger;
+use acdhOeaw\arche\thumbnails\handler\HandlerInterface;
 
 /**
  * Description of Resource
@@ -71,58 +71,37 @@ class Resource implements ResourceInterface {
         return array_pop($redirects);
     }
 
-    /**
-     *
-     * @var \zozlak\util\Config
-     */
-    private $config;
+    private object $config;
+    private string $url;
+    private PDO $pdo;
+    private ResourceMeta $meta;
+    private HandlerInterface $defaultHandler;
 
     /**
      *
-     * @var string
-     */
-    private $url;
-
-    /**
-     *
-     * @var \PDO
-     */
-    private $pdo;
-
-    /**
-     *
-     * @var \acdhOeaw\arche\thumbnails\ResourceMeta
-     */
-    private $meta;
-
-    /**
-     *
-     * @var array<handler\HandlerInterface>
+     * @var array<HandlerInterface>
      */
     private $handlers = [];
 
-    /**
-     * 
-     * @param string $id
-     * @param Config $config
-     */
-    public function __construct(string $id, Config $config) {
+    public function __construct(string $id, object $config) {
         Logger::info("Processing $id");
 
         $this->config = $config;
         $this->url    = $id;
         $this->meta   = new ResourceMeta();
-        $this->pdo    = new PDO($config->get('db'));
+        $this->pdo    = new PDO($config->db);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $this->maintainDb();
         $this->maintainMetadataCache();
 
-        foreach ($this->config->get('mimeHandlers') as $i) {
-            $handler = new $i();
+        foreach ($this->config->mimeHandlers as $i) {
+            $class   = $i->class;
+            $handler = new $class($i->config ?? new \stdClass());
             foreach ($handler->getHandledMimeTypes() as $j) {
                 $this->handlers[$j] = $handler;
             }
+            $this->defaultHandler = $handler;
         }
     }
 
@@ -149,8 +128,8 @@ class Resource implements ResourceInterface {
         $handler = $this->handlers[$this->meta->mime] ?? null;
         if (!file_exists($path) && $handler !== null) {
             if (!$handler->maintainsAspectRatio()) {
-                $width  = $width > 0 ? $width : $this->config->get('thumbnailDefaultWidth');
-                $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
+                $width  = $width > 0 ? $width : $this->config->defaultWidth;
+                $height = $height > 0 ? $height : $this->config->defaultHeight;
             }
             try {
                 Logger::info("\tusing the " . get_called_class() . " handler");
@@ -163,11 +142,10 @@ class Resource implements ResourceInterface {
 
         // last chance
         if (!file_exists($path)) {
-            $handlerClass = $this->config->get('mimeFallbackHandler');
-            $handler      = new $handlerClass();
+            $handler = $this->defaultHandler;
             if (!$handler->maintainsAspectRatio()) {
-                $width  = $width > 0 ? $width : $this->config->get('thumbnailDefaultWidth');
-                $height = $height > 0 ? $height : $this->config->get('thumbnailDefaultHeight');
+                $width  = $width > 0 ? $width : $this->config->efaultWidth;
+                $height = $height > 0 ? $height : $this->config->defaultHeight;
             }
             Logger::info("\thandler for " . $this->meta->mime . " unavailable - using the fallback handler");
             Logger::info("\t\thandlers available for " . implode(', ', array_keys($this->handlers)));
@@ -212,10 +190,6 @@ class Resource implements ResourceInterface {
         return $path;
     }
 
-    public function getConfig(string $property): mixed {
-        return $this->config->get($property);
-    }
-
     /**
      * List cached files for a given resource.
      * 
@@ -255,7 +229,7 @@ class Resource implements ResourceInterface {
      * @return string
      */
     private function getFilePath(int $width = 0, int $height = 0): string {
-        $base = $this->config->get('cacheDir');
+        $base = $this->config->cache->dir;
         $hash = hash('sha1', $this->meta->realUrl);
         return sprintf('%s/%s/%04d_%04d', $base, $hash, $width, $height);
     }
@@ -266,7 +240,7 @@ class Resource implements ResourceInterface {
      * @throws FileToLargeException
      */
     private function fetchResourceFile(): string {
-        $limit = $this->config->get('cacheMaxFileSizeMb');
+        $limit = $this->config->cache->maxFileSizeMb;
         if ($this->meta->sizeMb > $limit) {
             throw new FileToLargeException('Resource size (' . $this->meta->sizeMb . ' MB) exceeds the limit (' . $limit . ' MB)');
         }
@@ -309,19 +283,19 @@ class Resource implements ResourceInterface {
         $tmp   = $query->fetchObject(ResourceMeta::class);
         if ($tmp !== false) {
             $this->meta            = $tmp;
-            $this->meta->checkDate = new DateTime($this->meta->checkDate);
+            $this->meta->checkDate = new DateTimeImmutable($this->meta->checkDate);
         }
         $oldMeta = $this->meta;
 
         // compute time since last repository metadata check and update the local db
-        $diff = max(999999999, $this->config->get('cacheKeepAlive'));
+        $diff = max(999999999, $this->config->cache->keepAlive);
         if (!empty($this->meta->checkDate)) {
-            $diff = (new DateTime())->diff($this->meta->checkDate);
+            $diff = (new DateTimeImmutable())->diff($this->meta->checkDate);
             $diff = $diff->days * 24 * 3600 + $diff->h * 3600 + $diff->i * 60 + $diff->s;
         }
 
         // if needed, fetch metadata from the repository
-        if (empty($this->meta->checkDate) || $diff > $this->config->get('cacheKeepAlive')) {
+        if (empty($this->meta->checkDate) || $diff > $this->config->cache->keepAlive) {
             Logger::info("\tfetching fresh metadata from the repository ($diff s)");
 
             $parser  = new NQuadsParser(new DF(), false, NQuadsParser::MODE_TRIPLES);
@@ -332,22 +306,22 @@ class Resource implements ResourceInterface {
             // try to find thumbnail pointing to the resource
             $baseUrl   = substr($realUrl, 0, (int) strrpos($realUrl, '/'));
             $searchUrl = $baseUrl . '/search' .
-                '?property[0]=' . urlencode($this->config->get('archeTitleImageProp')) .
+                '?property[0]=' . urlencode($this->config->schema->titleImage) .
                 '&value[0]=' . urlencode($this->url) .
                 '&type[0]=' . urlencode(SearchTerm::TYPE_RELATION);
             $headers   = [
-                $this->config->get('archeMetaFetchHeader') => RepoResourceInterface::META_RESOURCE,
-                'Accept'                                   => 'application/n-triples',
+                $this->config->schema->metaFetchHeader => RepoResourceInterface::META_RESOURCE,
+                'Accept'                               => 'application/n-triples',
             ];
             try {
                 $resp = self::$client->send(new Request('GET', $searchUrl, $headers));
                 if ($resp->getStatusCode() === 200) {
-                    $meta     = new Dataset();
+                    $meta = new Dataset();
                     $meta->add($parser->parseStream(StreamWrapper::getResource($resp->getBody())));
-                    $match = $meta->copy(new QT(null, DF::namedNode($this->config->get('archeSearchMatchProp'))));
-                    if (count($match) > 0) {
-                        $meta->deleteExcept(new QT($match[0]->getSubject()));
-                        $realUrl = DE::getSubjectValue($match);
+                    $sbj  = $meta->listSubjects(new PT(DF::namedNode($this->config->schema->searchMatch)))->current();
+                    if ($sbj !== null) {
+                        $realUrl = $sbj->getValue();
+                        $meta->deleteExcept(new QT($sbj));
                         Logger::info("\t\tthumbnail pointing to the resource found");
                     } else {
                         $meta = null;
@@ -373,19 +347,19 @@ class Resource implements ResourceInterface {
                 }
             }
 
-            $hashProp    = DF::namedNode($this->config->get('archeHashProp'));
-            $modDateProp = DF::namedNode($this->config->get('archeModDateProp'));
-            $mimeProp    = DF::namedNode($this->config->get('archeMimeProp'));
-            $sizeProp    = DF::namedNode($this->config->get('archeSizeProp'));
+            $hashProp    = DF::namedNode($this->config->schema->hash);
+            $modDateProp = DF::namedNode($this->config->schema->modDate);
+            $mimeProp    = DF::namedNode($this->config->schema->mime);
+            $sizeProp    = DF::namedNode($this->config->schema->size);
             $classProp   = DF::namedNode(RDF::RDF_TYPE);
             $this->meta  = new ResourceMeta([
                 'url'       => $this->url,
-                'checkDate' => new DateTime(),
-                'repoHash'  => (string) DE::getObjectValue($meta, new QT(null, $hashProp)) ?? DE::getObjectValue($meta, new QT(null, $modDateProp)),
-                'mime'      => (string) DE::getObjectValue($meta, new QT(null, $mimeProp)),
-                'sizeMb'    => round((int) DE::getObjectValue($meta, new QT(null, $sizeProp)) / 1024 / 1024),
+                'checkDate' => new DateTimeImmutable(),
+                'repoHash'  => (string) ($meta->listObjects(new PT($hashProp))->current() ?? $meta->listObjects(new PT($modDateProp))->current()),
+                'mime'      => (string) $meta->listObjects(new PT($mimeProp))->current(),
+                'sizeMb'    => round((int) $meta->listObjects(new PT($sizeProp))->current()?->getValue() / 1024 / 1024),
                 'realUrl'   => $realUrl,
-                'class'     => (string) DE::getObjectValue($meta, new QT(null, $classProp)),
+                'class'     => (string) $meta->listObjects(new PT($classProp))->current(),
             ]);
 
             if (empty($oldMeta->checkDate)) {
@@ -413,7 +387,7 @@ class Resource implements ResourceInterface {
         } else {
             Logger::info("\tlocal metadata valid ($diff)");
         }
-        Logger::info("\t" . json_encode($this->meta));
+        Logger::info("\t" . json_encode($this->meta, JSON_UNESCAPED_SLASHES));
 
         // if metadata suggest resource has changed, delete local cache
         $dir = dirname($this->getFilePath());

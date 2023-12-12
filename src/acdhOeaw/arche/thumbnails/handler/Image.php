@@ -37,7 +37,7 @@ use acdhOeaw\arche\thumbnails\ResourceInterface;
  */
 class Image implements HandlerInterface {
 
-    public function __construct() {
+    public function __construct(object $config) {
         
     }
 

@@ -39,8 +39,10 @@ use acdhOeaw\arche\thumbnails\NoSuchFileException;
  */
 class Text implements HandlerInterface {
 
-    public function __construct() {
-        
+    private object $config;
+
+    public function __construct(object $config) {
+        $this->config = $config;
     }
 
     /**
@@ -60,15 +62,15 @@ class Text implements HandlerInterface {
                                     int $height, string $path): void {
         $srcPath   = $resource->getMeta()->url;
         $srcHandle = fopen($srcPath, 'r') ?: throw new NoSuchFileException();
-        $nLines    = max($resource->getConfig('textMinLines'), $height / $resource->getConfig('textLineHeight'));
+        $nLines    = max($this->config->minLines, $height / $this->config->lineHeight);
         $lines     = [];
         while (count($lines) < $nLines) {
             $lines[] = fgets($srcHandle, 1000);
         }
         fclose($srcHandle);
 
-        $x          = (int) ($width * $resource->getConfig('textMargin'));
-        $y          = (int) min($x, $height * $resource->getConfig('textMargin'));
+        $x          = (int) ($width * $this->config->margin);
+        $y          = (int) min($x, $height * $this->config->margin);
         $lineHeight = ($height - 2 * $y) / $nLines;
         $draw       = new ImagickDraw();
         $draw->setFontSize($lineHeight * 0.75);
@@ -81,5 +83,4 @@ class Text implements HandlerInterface {
         $trgt->drawImage($draw);
         $trgt->writeImage('png:' . $path);
     }
-
 }

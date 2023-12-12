@@ -11,13 +11,12 @@
         }
     ],
     "require": {
+        "ext-imagick": "*",
+        "ext-yaml": "*",
         "guzzlehttp/guzzle": "^7",
-        "zozlak/util": "^1.5",
-        "acdh-oeaw/arche-lib": ">=2 <6",
+        "acdh-oeaw/arche-lib": "dev-rdfInterface",
         "zozlak/logging": "^1",
-        "sweetrdf/quick-rdf-io": "^1",
-        "sweetrdf/quick-rdf": "^1",
-        "sweetrdf/term-templates": "^1"
+        "sweetrdf/term-templates": "^2"
     },
     "autoload": {
         "psr-4": {
@@ -26,5 +25,6 @@
     },
     "require-dev": {
         "phpstan/phpstan": "*"
-    }
+    },
+    "minimum-stability": "dev"
 }
