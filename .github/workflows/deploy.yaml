@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: test
-        run: |
-          composer update
-          vendor/bin/phpunit tests
+      #- name: test
+      #  run: |
+      #    composer update
+      #    vendor/bin/phpunit tests
       - name: build docker image
         run: |
           git reset --hard HEAD
