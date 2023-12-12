@@ -2,8 +2,8 @@
 /vendor
 /composer.lock
 *.sqlite
-/config.ini
 /tmp
 /cache
 /log
 /assets
+/build/docroot
