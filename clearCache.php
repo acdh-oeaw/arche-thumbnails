@@ -24,26 +24,23 @@
  * THE SOFTWARE.
  */
 
-use zozlak\util\Config;
 use acdhOeaw\arche\thumbnails\ClearCache;
 
 $composer = require_once __DIR__ . '/vendor/autoload.php';
-$composer->addPsr4('acdhOeaw\\', __DIR__ . '/src/acdhOeaw');
-
 
 if (!in_array($argc, [2, 4])) {
     echo "Clears thumbnails cache\nUsage:\n";
-    echo "  " . $argv[0] . " pathToConfig.ini\n";
+    echo "  " . $argv[0] . " pathToConfig.yaml\n";
     echo "or\n";
     echo "  " . $argv[0] . " cacheDir cacheSizeLimitMb mode\n      where `mode` should be 'time' or 'size'\n";
     exit();
 }
 
 if ($argc === 2) {
-    $config  = new Config($argv[1]);
-    $dir     = $config->get('cacheDir');
-    $maxSize = $config->get('cacheMaxSizeMb');
-    $mode = $config->get('cacheMaxSizeMb');
+    $config  = yaml_parse_file($argv[1]);
+    $dir     = $config['cache']['dir'];
+    $maxSize = $config['cache']['maxSizeMb'];
+    $mode    = $config['cache']['clearMode'];
 } else {
     $dir     = $argv[1];
     $maxSize = $argv[2];
