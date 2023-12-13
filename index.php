@@ -31,7 +31,7 @@ use acdhOeaw\arche\thumbnails\Resource;
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
-$composer = require_once 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
 $config = json_decode(json_encode(yaml_parse_file('config.yaml')));
 
