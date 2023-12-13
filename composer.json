@@ -12,6 +12,8 @@
     ],
     "require": {
         "ext-imagick": "*",
+        "ext-pdo": "*",
+        "ext-pdo_sqlite": "*",
         "ext-yaml": "*",
         "guzzlehttp/guzzle": "^7",
         "acdh-oeaw/arche-lib": "dev-rdfInterface",
