@@ -318,7 +318,7 @@ class Resource implements ResourceInterface {
                 if ($resp->getStatusCode() === 200) {
                     $meta = new Dataset();
                     $meta->add($parser->parseStream(StreamWrapper::getResource($resp->getBody())));
-                    $sbj  = $meta->listSubjects(new PT(DF::namedNode($this->config->schema->searchMatch)))->current();
+                    $sbj  = $meta->getSubject(new PT(DF::namedNode($this->config->schema->searchMatch)));
                     if ($sbj !== null) {
                         $realUrl = $sbj->getValue();
                         $meta->deleteExcept(new QT($sbj));
@@ -355,11 +355,11 @@ class Resource implements ResourceInterface {
             $this->meta  = new ResourceMeta([
                 'url'       => $this->url,
                 'checkDate' => new DateTimeImmutable(),
-                'repoHash'  => (string) ($meta->listObjects(new PT($hashProp))->current() ?? $meta->listObjects(new PT($modDateProp))->current()),
-                'mime'      => (string) $meta->listObjects(new PT($mimeProp))->current(),
-                'sizeMb'    => round((int) $meta->listObjects(new PT($sizeProp))->current()?->getValue() / 1024 / 1024),
+                'repoHash'  => (string) ($meta->getObject(new PT($hashProp)) ?? $meta->getObject(new PT($modDateProp))),
+                'mime'      => (string) $meta->getObject(new PT($mimeProp)),
+                'sizeMb'    => round((int) $meta->getObject(new PT($sizeProp))?->getValue() / 1024 / 1024),
                 'realUrl'   => $realUrl,
-                'class'     => (string) $meta->listObjects(new PT($classProp))->current(),
+                'class'     => (string) $meta->getObject(new PT($classProp)),
             ]);
 
             if (empty($oldMeta->checkDate)) {

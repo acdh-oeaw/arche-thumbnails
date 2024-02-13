@@ -19,6 +19,7 @@ jobs:
       - name: build docker image
         run: |
           git reset --hard HEAD
+          rm -fR vendor
           mkdir build/docroot && cp -R `ls -1 | grep -v ^build` build/docroot/ && cp build/config/arche.yaml build/docroot/config.yaml && cp -R build/assets/arche build/docroot/assets && mkdir build/docroot/cache && mkdir build/docroot/tmp && cp .htaccess build/docroot/
           docker build --rm -t "acdhch/$RANCHER_NAMESPACE:latest" --build-arg VARIANT=production --label "buildUrl=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" build
       - name: test image
