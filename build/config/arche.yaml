@@ -39,7 +39,7 @@ mimeHandlers:
       "y": 0.7
       width: 0.6
       height: 0.2
-      defaultImage: var/www/html/assets/arche_resource.svg
+      defaultImage: /var/www/html/assets/arche_resource.svg
       classMap:
         Collection: /var/www/html/assets/arche_collection.svg
         TopCollection: /var/www/html/assets/arche_topCollection.svg
