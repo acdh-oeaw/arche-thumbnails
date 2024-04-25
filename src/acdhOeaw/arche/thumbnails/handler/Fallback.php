@@ -30,6 +30,7 @@ use Imagick;
 use ImagickDraw;
 use ImagickPixel;
 use acdhOeaw\arche\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\NoThumbnailException;
 
 /**
  * A fallback thumbnail handler creating a document-like icon filled with
@@ -87,8 +88,10 @@ class Fallback implements HandlerInterface {
                 $lw  = $this->config->width;
                 $lh  = $this->config->height;
                 $img = $this->createFromTemplate($mime, $width, $height, $imgPath, $x, $y, $lw, $lh, $tc, $tw, $ml);
-            } else {
+            } elseif($this->canfig->drawGeneric ?? false) {
                 $img = $this->createGeneric($mime, $width, $height, $sw, $tc, $tw, $ml);
+            } else {
+                throw NoThumbnailException();
             }
         }
         $img->writeImage('png:' . $path);

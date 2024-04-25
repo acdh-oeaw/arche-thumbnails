@@ -112,9 +112,9 @@ class Resource implements ResourceInterface {
      * 
      * @param int $width
      * @param int $height
-     * @return string
+     * @return string|false
      */
-    public function getThumbnail(int $width = 0, int $height = 0): string {
+    public function getThumbnail(int $width = 0, int $height = 0): string | false {
         $path = $this->getFilePath($width, $height);
         if (file_exists($path)) {
             Logger::info("\tfound in cache ($path)");
@@ -149,7 +149,12 @@ class Resource implements ResourceInterface {
             }
             Logger::info("\thandler for " . $this->meta->mime . " unavailable - using the fallback handler");
             Logger::info("\t\thandlers available for " . implode(', ', array_keys($this->handlers)));
-            $handler->createThumbnail($this, $width, $height, $path);
+            try {
+                $handler->createThumbnail($this, $width, $height, $path);
+            } catch (NoThumbnailException $ex) {
+                Logger::info("\tno thumbnail generated according to the config");
+                return false;
+            }
         }
 
         return $path;

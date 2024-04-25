@@ -22,11 +22,11 @@ cache:
   maxSizeMb: 2000
   clearMode: size # 'size' or 'time'
 mimeHandlers:
-  - class: \acdhOeaw\arche\thumbnails\handler\Text
-    config:
-      lineHeight: 25
-      minLines: 3
-      margin: 0.05
+  #- class: \acdhOeaw\arche\thumbnails\handler\Text
+  #  config:
+  #    lineHeight: 25
+  #    minLines: 3
+  #    margin: 0.05
   - class: \acdhOeaw\arche\thumbnails\handler\Image
     config: ~
   - class: \acdhOeaw\arche\thumbnails\handler\Fallback
@@ -39,9 +39,10 @@ mimeHandlers:
       "y": 0.7
       width: 0.6
       height: 0.2
-      defaultImage: /var/www/html/assets/arche_resource.svg
+      #/var/www/html/assets/arche_resource.svg
+      defaultImage: ~ 
+      drawGeneric: false
       classMap:
-        Collection: /var/www/html/assets/arche_collection.svg
         TopCollection: /var/www/html/assets/arche_topCollection.svg
         Publication: /var/www/html/assets/arche_publication.svg
         Metadata: /var/www/html/assets/arche_metadata.svg

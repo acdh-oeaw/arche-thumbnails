@@ -53,9 +53,14 @@ if ($width === 0 && $height === 0) {
     $height = $config->defaultHeight;
 }
 
-$res   = new Resource($url, $config);
+$res  = new Resource($url, $config);
 $path = $res->getThumbnail($width, $height);
-header('Content-Type: image/png');
-header('Content-Size: ' . filesize($path));
-readfile($path);
+if ($path === false) {
+    http_response_code(404);
+    echo "No thumbnail can be generated for this resource";
+} else {
+    header('Content-Type: image/png');
+    header('Content-Size: ' . filesize($path));
+    readfile($path);
+}
 
