@@ -26,9 +26,6 @@ jobs:
         run: |
           docker run -d --name "$RANCHER_NAMESPACE" -p 8080:80 "acdhch/$RANCHER_NAMESPACE:latest"
           sleep 1
-      - uses: mxschmitt/action-tmate@v3
-      - name: test image
-        run: |
           # separate title image - Image class
           curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms?width=150'
           curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms?width=150'
