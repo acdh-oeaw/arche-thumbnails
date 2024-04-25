@@ -91,7 +91,7 @@ class Fallback implements HandlerInterface {
             } elseif($this->canfig->drawGeneric ?? false) {
                 $img = $this->createGeneric($mime, $width, $height, $sw, $tc, $tw, $ml);
             } else {
-                throw NoThumbnailException();
+                throw new NoThumbnailException();
             }
         }
         $img->writeImage('png:' . $path);

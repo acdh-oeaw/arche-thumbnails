@@ -29,12 +29,12 @@ jobs:
           # separate title image - Image class
           curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms?width=150'
           curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms?width=150'
-          # collection - Fallback class
-          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/editions?width=150'
-          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/editions?width=150'
-          # text file - Text class
-          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml?width=150'
-          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml?width=150'
+          # collection - Fallback class - no thumbnail
+          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/editions?width=150' | grep '404 Not Found'
+          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/editions?width=150' | grep '404 Not Found'
+          # text file - Fallback class - no thumbnail
+          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml?width=150' | grep '404 Not Found'
+          curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml?width=150' | grep '404 Not Found'
           # image - Image class
           curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif'
           curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif'
