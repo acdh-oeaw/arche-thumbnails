@@ -9,10 +9,9 @@ RUN apt update &&\
     install-php-extensions imagick yaml xml xmlreader pdo_pgsql @composer &&\
     a2enmod rewrite
 COPY docroot /var/www/html
-COPY entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN cd /var/www/html &&\
     composer update -o --no-dev &&\
     chown -R www-data:www-data /var/www/html
 EXPOSE 80
-ENTRYPOINT /entrypoint.sh
-CMD apache2-foreground
+ENTRYPOINT entrypoint.sh
