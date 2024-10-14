@@ -18,6 +18,7 @@ jobs:
       #  run: |
       #    composer update
       #    vendor/bin/phpunit tests
+      - uses: mxschmitt/action-tmate@v3
       - name: prepare arche-prod and arche-cur configs
         run: |
           mkdir tmp && cd tmp && composer require -n zozlak/yaml-merge
