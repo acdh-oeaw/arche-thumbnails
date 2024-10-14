@@ -91,7 +91,7 @@ class Resource {
         }
 
         // return ResourceMeta
-        $resourceMeta = ResourceMeta::fromDatasetNode($res->getGraph(), $config->schema);
+        $resourceMeta = ResourceMeta::fromDatasetNode($res->getGraph(), self::$schema);
         return new ResponseCacheItem($resourceMeta->serialize());
     }
 
@@ -268,7 +268,7 @@ class Resource {
             throw new NoSuchFileException('The requested file misses binary content');
         }
         $body  = $resp->getBody();
-        $fout  = fopen($pathTmp, 'w') ?: throw new RuntimeException("Can't open $tmpPath for writing");
+        $fout  = fopen($pathTmp, 'w') ?: throw new RuntimeException("Can't open $pathTmp for writing");
         $chunk = 10 ^ 6; // 1 MB
         while (!$body->eof()) {
             fwrite($fout, (string) $body->read($chunk));
