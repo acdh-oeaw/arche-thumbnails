@@ -21,7 +21,14 @@ jobs:
       #- uses: mxschmitt/action-tmate@v3
       - name: prepare arche-prod and arche-cur configs
         run: |
-          mkdir tmp && cd tmp && composer require -n zozlak/yaml-merge && curl https://arche.acdh.oeaw.ac.at/api/describe > prod.yaml && curl https://arche-curation.acdh-dev.oeaw.ac.at/api/describe > cur.yaml && vendor/bin/yaml-merge.php --src prod.yaml --src "{\"dbConn\": {\"guest\": \"$DBCONN_PROD${{ secrets.archedbpswd }}\"}}" ../archeProd.yaml && vendor/bin/yaml-merge.php --src cur.yaml --src "{\"dbConn\": {\"guest\": \"$DBCONN_CUR${{ secrets.archedbpswd }}\"}}" ../archeCur.yaml && cd .. && rm -fR tmp
+          mkdir tmp && cd tmp 
+          composer require -n zozlak/yaml-merge
+          ls -l vendor/bin
+          curl https://arche.acdh.oeaw.ac.at/api/describe > prod.yaml
+          curl https://arche-curation.acdh-dev.oeaw.ac.at/api/describe > cur.yaml
+          vendor/bin/yaml-merge.php --src prod.yaml --src "{\"dbConn\": {\"guest\": \"$DBCONN_PROD${{ secrets.archedbpswd }}\"}}" ../archeProd.yaml
+          vendor/bin/yaml-merge.php --src cur.yaml --src "{\"dbConn\": {\"guest\": \"$DBCONN_CUR${{ secrets.archedbpswd }}\"}}" ../archeCur.yaml
+          cd .. && rm -fR tmp
       - name: build docker image
         run: |
           git reset --hard HEAD
