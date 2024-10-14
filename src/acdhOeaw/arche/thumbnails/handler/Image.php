@@ -28,7 +28,7 @@ namespace acdhOeaw\arche\thumbnails\handler;
 
 use Imagick;
 use ImagickPixel;
-use acdhOeaw\arche\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\Resource;
 
 /**
  * Creates thumbnails from image files by rescaling it to the desired resolution.
@@ -53,9 +53,9 @@ class Image implements HandlerInterface {
         return true;
     }
 
-    public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path): void {
-        $srcPath   = $resource->getResourcePath();
+    public function createThumbnail(Resource $resource, int $width, int $height,
+                                    string $path): void {
+        $srcPath   = $resource->getRefFilePath();
         $src       = new Imagick();
         $src->setBackgroundColor(new ImagickPixel('transparent'));
         $src->readImage($srcPath);

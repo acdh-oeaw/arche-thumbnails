@@ -29,7 +29,7 @@ namespace acdhOeaw\arche\thumbnails\handler;
 use Imagick;
 use ImagickDraw;
 use ImagickPixel;
-use acdhOeaw\arche\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\Resource;
 use acdhOeaw\arche\thumbnails\NoSuchFileException;
 
 /**
@@ -58,9 +58,9 @@ class Text implements HandlerInterface {
         return false;
     }
 
-    public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path): void {
-        $srcPath   = $resource->getMeta()->url;
+    public function createThumbnail(Resource $resource, int $width, int $height,
+                                    string $path): void {
+        $srcPath   = $resource->getRefFilePath();
         $srcHandle = fopen($srcPath, 'r') ?: throw new NoSuchFileException();
         $nLines    = max($this->config->minLines, $height / $this->config->lineHeight);
         $lines     = [];

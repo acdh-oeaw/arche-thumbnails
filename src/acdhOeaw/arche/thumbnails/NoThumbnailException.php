@@ -31,6 +31,10 @@ namespace acdhOeaw\arche\thumbnails;
  *
  * @author zozlak
  */
-class NoThumbnailException extends \Exception {
-    //put your code here
+class NoThumbnailException extends ThumbnailException {
+
+    public function __construct(string $message = "According to the service configuration no thumbnail should be generated for this resource",
+                                int $code = 404, ?\Throwable $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }

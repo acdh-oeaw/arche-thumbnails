@@ -27,6 +27,8 @@
 namespace acdhOeaw\arche\thumbnails;
 
 use DateTimeImmutable;
+use rdfInterface\DatasetNodeInterface;
+use termTemplates\PredicateTemplate as PT;
 
 /**
  * Description of ResourceMeta
@@ -35,26 +37,31 @@ use DateTimeImmutable;
  */
 class ResourceMeta {
 
-    public string $url;
+    static public function fromDatasetNode(DatasetNodeInterface $meta, object $schema): self {
+        $resMeta           = new self();
+        $resMeta->url      = (string) $meta->getNode();
+        $resMeta->realUrl  = $meta->getObjectValue(new PT($schema->titleImage)) ?? $resMeta->url;
+        $resMeta->repoHash = $meta->getObjectValue(new PT($schema->hash)) ?? '__no hash__';
+        $resMeta->mime     = $meta->getObjectValue(new PT($schema->mime)) ?? '';
+        $resMeta->sizeMb   = ((int) $meta->getObjectValue(new PT($schema->size))) >> 20;
+        $resMeta->class    = $meta->getObjectValue(new PT($schema->class)) ?? '__no class__';
+        $resMeta->modDate  = new DateTimeImmutable($meta->getObjectValue(new PT($schema->modDate)));
+        return $resMeta;
+    }
 
-    /**
-     * 
-     * @var DateTimeImmutable
-     */
-    public $checkDate;
+    static public function deserialize(string $data): self {
+        return unserialize($data);
+    }
+
+    public string $url;
+    public string $realUrl;
     public string $repoHash = '';
     public string $mime     = '';
     public int $sizeMb   = 0;
-    public string $realUrl  = '';
     public string $class    = '';
+    public DateTimeImmutable $modDate;
 
-    /**
-     * 
-     * @param array<string, mixed> $data
-     */
-    public function __construct(array $data = []) {
-        foreach ($data as $k => $v) {
-            $this->$k = $v;
-        }
+    public function serialize(): string {
+        return serialize($this);
     }
 }

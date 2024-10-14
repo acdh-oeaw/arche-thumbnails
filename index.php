@@ -25,8 +25,16 @@
  */
 
 use zozlak\logging\Log;
-use zozlak\logging\Logger;
+use acdhOeaw\arche\lib\RepoDb;
+use acdhOeaw\arche\lib\SearchConfig;
+use acdhOeaw\arche\lib\exception\NotFound;
+use acdhOeaw\arche\lib\dissCache\CachePdo;
+use acdhOeaw\arche\lib\dissCache\ResponseCache;
 use acdhOeaw\arche\thumbnails\Resource;
+use acdhOeaw\arche\thumbnails\ResourceMeta;
+use acdhOeaw\arche\lib\dissCache\RepoWrapperGuzzle;
+use acdhOeaw\arche\lib\dissCache\RepoWrapperRepoInterface;
+use acdhOeaw\arche\thumbnails\ThumbnailException;
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
@@ -35,32 +43,67 @@ require_once 'vendor/autoload.php';
 
 $config = json_decode(json_encode(yaml_parse_file('config.yaml')));
 
-Logger::addLog(new Log($config->log->file), $config->log->level);
-
-// extract ARCHE id from the request URL
-$url = filter_input(INPUT_GET, 'id');
-if (empty($url)) {
-    $url = substr($_SERVER['REDIRECT_URL'], strlen($config->baseUrl));
-    if (!preg_match('|^https?://|', $url)) {
-        $url = $config->schema->idPrefix . $url;
+$logId               = sprintf("%08d", rand(0, 99999999));
+$tmpl                = "{TIMESTAMP}:$logId:{LEVEL}\t{MESSAGE}";
+$log                 = new Log($config->log->file, $config->log->level, $tmpl);
+Resource::$logStatic = $log;
+try {
+    $id      = $_GET['id'] ?? 'no identifer provided';
+    $allowed = false;
+    foreach ($config->allowedNmsp as $i) {
+        if (str_starts_with($id, $i)) {
+            $allowed = true;
+            break;
+        }
     }
-}
+    if (!$allowed) {
+        throw new ThumbnailException("Requested resource $id not in allowed namespace", 400);
+    }
 
-$width  = filter_input(INPUT_GET, 'width') ?? 0;
-$height = filter_input(INPUT_GET, 'height') ?? 0;
-if ($width === 0 && $height === 0) {
-    $width  = $config->defaultWidth;
-    $height = $config->defaultHeight;
-}
+    $cache = new CachePdo($config->db);
 
-$res  = new Resource($url, $config);
-$path = $res->getThumbnail($width, $height);
-if ($path === false) {
-    http_response_code(404);
-    echo "No thumbnail can be generated for this resource";
-} else {
-    header('Content-Type: image/png');
+    $repos = [];
+    foreach($config->repoDb ?? [] as $i) {
+        $repos[] = new RepoWrapperRepoInterface(RepoDb::factory($i), true);
+    }
+    $repos[] = new RepoWrapperGuzzle(false);
+
+    $searchConfig                         = new SearchConfig();
+    $searchConfig->metadataMode           = '1_0_0_0';
+    $searchConfig->metadataParentProperty = $config->schema->titleImage;
+    $searchConfig->resourceProperties     = array_values((array) $config->schema);
+    $searchConfig->relativesProperties    = $searchConfig->resourceProperties;
+
+    $cache = new ResponseCache($cache, fn($a, $b) => Resource::cacheHandler($a, $b), $config->cache->ttl->resource, $config->cache->ttl->response, $repos, $searchConfig, $log);
+
+    $cachedItem = $cache->getResponse($config, $id);
+    $resMeta    = ResourceMeta::deserialize($cachedItem->body);
+    $res        = new Resource($resMeta, $config, $log);
+
+    $width  = filter_input(INPUT_GET, 'width') ?? 0;
+    $height = filter_input(INPUT_GET, 'height') ?? 0;
+    if ($width === 0 && $height === 0) {
+        $width  = $config->defaultWidth;
+        $height = $config->defaultHeight;
+    }
+    $path = $res->getThumbnailPath($width, $height);
     header('Content-Size: ' . filesize($path));
+    header('Content-Type: image/png');
     readfile($path);
+} catch (\Throwable $e) {
+    $code              = $e->getCode();
+    $ordinaryException = $e instanceof ThumbnailException || $e instanceof NotFound;
+    $logMsg            = "$code: " . $e->getMessage() . ($ordinaryException ? '' : "\n" . $e->getFile() . ":" . $e->getLine() . "\n" . $e->getTraceAsString());
+    $log->error($logMsg);
+
+    if ($code < 400 || $code >= 500) {
+        $code = 500;
+    }
+    http_response_code($code);
+    if ($ordinaryException) {
+        echo $e->getMessage() . "\n";
+    } else {
+        echo "Internal Server Error\n";
+    }
 }
 

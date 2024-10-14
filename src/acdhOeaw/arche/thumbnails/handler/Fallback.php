@@ -29,7 +29,7 @@ namespace acdhOeaw\arche\thumbnails\handler;
 use Imagick;
 use ImagickDraw;
 use ImagickPixel;
-use acdhOeaw\arche\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\Resource;
 use acdhOeaw\arche\thumbnails\NoThumbnailException;
 
 /**
@@ -58,7 +58,7 @@ class Fallback implements HandlerInterface {
         return false;
     }
 
-    public function createThumbnail(ResourceInterface $resource, int $width,
+    public function createThumbnail(Resource $resource, int $width,
                                     int $height, string $path): void {
         // sanitize the mime type
         $mime = $resource->getMeta()->mime;

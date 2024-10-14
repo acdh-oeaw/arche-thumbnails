@@ -32,5 +32,9 @@ namespace acdhOeaw\arche\thumbnails;
  * @author zozlak
  */
 class FileToLargeException extends NoSuchFileException {
-    
+
+    public function __construct(string $message = "Image too large to generate the thumbnail",
+                                int $code = 400, ?\Throwable $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }

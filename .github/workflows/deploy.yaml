@@ -7,6 +7,8 @@ env:
   RANCHER_API_BASE: https://rancher.acdh-dev.oeaw.ac.at/v3
   RANCHER_PROJECT: Dissemination services
   RANCHER_NAMESPACE: arche-thumbnails
+  DBCONN_PROD: "pgsql: host=10.6.16.94 port=5433 user=arche_thumbnails dbname=arche_prod password="
+  DBCONN_CUR: "pgsql: host=10.6.16.94 port=5433 user=arche_thumbnails dbname=arche_cur password="
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,9 +18,17 @@ jobs:
       #  run: |
       #    composer update
       #    vendor/bin/phpunit tests
+      - name: prepare arche-prod and arche-cur configs
+        mkdir tmp && cd tmp && composer require -n zozlak/yaml-merge
+        curl https://arche.acdh.oeaw.ac.at/api/describe > prod.yaml
+        curl https://arche-curation.acdh-dev.oeaw.ac.at/api/describe > cur.yaml
+        vendor/bin/yaml-merge.php --src prod.yaml --src "{\"dbConn\": {\"guest\": \"$DBCONN_PROD${{ secrets.archedbpswd }}\"}}" ../archeProd.yaml
+        vendor/bin/yaml-merge.php --src cur.yaml --src "{\"dbConn\": {\"guest\": \"$DBCONN_CUR${{ secrets.archedbpswd }}\"}}" ../archeCur.yaml
+        cd .. && rm -fR tmp
       - name: build docker image
         run: |
           git reset --hard HEAD
+          curl https://arche.acdh.oeaw.ac.at/api/describe > build/docroot/prod.yaml && 
           rm -fR vendor
           mkdir build/docroot && cp -R `ls -1 | grep -v ^build` build/docroot/ && cp build/config/arche.yaml build/docroot/config.yaml && cp -R build/assets/arche build/docroot/assets && mkdir build/docroot/cache && mkdir build/docroot/tmp && cp .htaccess build/docroot/
           docker build --rm -t "acdhch/$RANCHER_NAMESPACE:latest" --build-arg VARIANT=production --label "buildUrl=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" build

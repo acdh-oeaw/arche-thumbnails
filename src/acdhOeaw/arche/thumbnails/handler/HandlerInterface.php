@@ -26,7 +26,7 @@
 
 namespace acdhOeaw\arche\thumbnails\handler;
 
-use acdhOeaw\arche\thumbnails\ResourceInterface;
+use acdhOeaw\arche\thumbnails\Resource;
 
 /**
  * Description of FormatInterface
@@ -34,7 +34,7 @@ use acdhOeaw\arche\thumbnails\ResourceInterface;
  * @author zozlak
  */
 interface HandlerInterface {
-    
+
     public function __construct(object $config);
 
     /**
@@ -49,18 +49,13 @@ interface HandlerInterface {
      * (in other words is it possible to pass only one dimension and the other
      * will be computed automatically)
      *
-     * @return bool
      */
     public function maintainsAspectRatio(): bool;
 
     /**
      * Creates a thumbnail with given dimensions for a given resource
      * 
-     * @param ResourceInterface $resource
-     * @param int $width
-     * @param int $height
-     * @param string $path
      */
-    public function createThumbnail(ResourceInterface $resource, int $width,
-                                    int $height, string $path): void;
+    public function createThumbnail(Resource $resource, int $width, int $height,
+                                    string $path): void;
 }

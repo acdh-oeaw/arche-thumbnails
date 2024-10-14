@@ -31,6 +31,10 @@ namespace acdhOeaw\arche\thumbnails;
  *
  * @author zozlak
  */
-class NoSuchFileException extends \Exception {
-    
+class NoSuchFileException extends ThumbnailException {
+
+    public function __construct(string $message = "Requested resource can't be accessed",
+                                int $code = 404, ?\Throwable $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
 }

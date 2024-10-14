@@ -3,7 +3,7 @@
 /*
  * The MIT License
  *
- * Copyright 2019 Austrian Centre for Digital Humanities.
+ * Copyright 2024 zozlak.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,34 +27,10 @@
 namespace acdhOeaw\arche\thumbnails;
 
 /**
+ * Description of ThumbnailException
  *
  * @author zozlak
  */
-interface ResourceInterface {
-
-    /**
-     * Returns resource's basic metadata (URL, mime type, size,
-     * modification date, etc.)
-     *
-     * @return \acdhOeaw\arche\thumbnails\ResourceMeta
-     */
-    public function getMeta(): ResourceMeta;
-
-    /**
-     * Returns path to the file storing a repository resource payload.
-     * @return string
-     */
-    public function getResourcePath(): string;
-
-    /**
-     * List files cached for a resource.
-     * 
-     * Returnes 2D array with first dimension indicating available widths and
-     * second dimension listing heights available for a given width. Both dimensions
-     * are encoded as strings left-padded with zeros up to 5 digits length.
-     *
-     * @param int $order \SCANDIR_SORT_ASCENDING or SCANDIR_SORT_DESCENDING
-     * @return array<string, array<string>>
-     */
-    public function getCachedFiles(int $order): array;
+class ThumbnailException extends \Exception {
+    
 }
