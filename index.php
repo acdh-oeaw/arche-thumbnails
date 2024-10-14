@@ -63,7 +63,7 @@ try {
     $cache = new CachePdo($config->db);
 
     $repos = [];
-    foreach($config->repoDb ?? [] as $i) {
+    foreach ($config->repoDb ?? [] as $i) {
         $repos[] = new RepoWrapperRepoInterface(RepoDb::factory($i), true);
     }
     $repos[] = new RepoWrapperGuzzle(false);
@@ -76,16 +76,18 @@ try {
 
     $cache = new ResponseCache($cache, fn($a, $b) => Resource::cacheHandler($a, $b), $config->cache->ttl->resource, $config->cache->ttl->response, $repos, $searchConfig, $log);
 
-    $cachedItem = $cache->getResponse($config, $id);
-    $resMeta    = ResourceMeta::deserialize($cachedItem->body);
-    $res        = new Resource($resMeta, $config, $log);
-
     $width  = filter_input(INPUT_GET, 'width') ?? 0;
     $height = filter_input(INPUT_GET, 'height') ?? 0;
     if ($width === 0 && $height === 0) {
         $width  = $config->defaultWidth;
         $height = $config->defaultHeight;
     }
+
+    Resource::$schema = $config->schema;
+    $cachedItem       = $cache->getResponse([$width, $height, $id], $id);
+    $resMeta          = ResourceMeta::deserialize($cachedItem->body);
+    $res              = new Resource($resMeta, $config, $log);
+
     $path = $res->getThumbnailPath($width, $height);
     header('Content-Size: ' . filesize($path));
     header('Content-Type: image/png');

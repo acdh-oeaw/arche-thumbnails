@@ -49,7 +49,8 @@ class Resource {
 
     const DEFAULT_MAX_FILE_SIZE_MB = 100;
 
-    static LoggerInterface $logStatic;
+    static public LoggerInterface $logStatic;
+    static public object $schema;
 
     /**
      * Gets the requested repository resource metadata and converts it to the thumbnail's
@@ -57,13 +58,13 @@ class Resource {
      * 
      */
     static public function cacheHandler(RepoResourceInterface $res,
-                                        object $config): ResponseCacheItem {
+                                        array $param): ResponseCacheItem {
         $resUri = $res->getUri();
         $graph  = $res->getGraph()->getDataset();
 
         // handle isTitleResourceOf
-        $titleImageProp = DF::namedNode($config->schema->titleImage);
-        $idProp         = DF::namedNode($config->schema->id);
+        $titleImageProp = DF::namedNode(self::$schema->titleImage);
+        $idProp         = DF::namedNode(self::$schema->id);
         $titleImageSbj  = $graph->getSubject(new PT($titleImageProp, $resUri));
         if ($titleImageSbj !== null) {
             self::$logStatic->info("titleImageOf found");
