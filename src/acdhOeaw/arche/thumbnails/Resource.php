@@ -120,7 +120,7 @@ class Resource {
 
         // if the thumbnail exists and is up to date, just serve it
         if (file_exists($path) && filemtime($path) > $this->meta->modDate->getTimestamp()) {
-            $this->log?->info("Serving $width x $height thumnail from cache $path");
+            $this->log?->info("Serving $width x $height thumbnail from cache $path");
             return $path;
         }
 
@@ -187,7 +187,7 @@ class Resource {
                 $height = $height > 0 ? $height : $this->config->defaultHeight;
             }
             try {
-                $this->log?->info("Generating $width x $height thumnail from $refPath using the " . get_class($handler) . " handler");
+                $this->log?->info("Generating $width x $height thumbnail from $refPath using the " . get_class($handler) . " handler");
                 $handler->createThumbnail($this, $width, $height, $pathTmp);
             } catch (Throwable $ex) {
                 $this->log?->error($ex->getMessage() . "\n" . $ex->getTraceAsString());
@@ -201,7 +201,7 @@ class Resource {
                 $width  = $width > 0 ? $width : $this->config->efaultWidth;
                 $height = $height > 0 ? $height : $this->config->defaultHeight;
             }
-            $this->log?->info("Generating $width x $height thumnail from $refPath using the " . get_class($handler) . " handler");
+            $this->log?->info("Generating $width x $height thumbnail from $refPath using the " . get_class($handler) . " handler");
             $handler->createThumbnail($this, $width, $height, $pathTmp);
         }
 
