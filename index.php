@@ -43,12 +43,12 @@ require_once 'vendor/autoload.php';
 
 $config = json_decode(json_encode(yaml_parse_file('config.yaml')));
 
-$logId               = sprintf("%08d", rand(0, 99999999));
-$tmpl                = "{TIMESTAMP}:$logId:{LEVEL}\t{MESSAGE}";
-$log                 = new Log($config->log->file, $config->log->level, $tmpl);
-Resource::$logStatic = $log;
+$logId = sprintf("%08d", rand(0, 99999999));
+$tmpl  = "{TIMESTAMP}:$logId:{LEVEL}\t{MESSAGE}";
+$log   = new Log($config->log->file, $config->log->level, $tmpl);
 try {
     $id      = $_GET['id'] ?? 'no identifer provided';
+    $log->info("Getting thumbnail for $id");
     $allowed = false;
     foreach ($config->allowedNmsp as $i) {
         if (str_starts_with($id, $i)) {
@@ -74,7 +74,9 @@ try {
     $searchConfig->resourceProperties     = array_values((array) $config->schema);
     $searchConfig->relativesProperties    = $searchConfig->resourceProperties;
 
-    $cache = new ResponseCache($cache, fn($a, $b) => Resource::cacheHandler($a, $b), $config->cache->ttl->resource, $config->cache->ttl->response, $repos, $searchConfig, $log);
+    $clbck = fn($a, $b) => Resource::cacheHandler($a, $b, $log, $config->schema);
+    $ttl   = $config->cache->ttl;
+    $cache = new ResponseCache($cache, $clbck, $ttl->resource, $ttl->response, $repos, $searchConfig, $log);
 
     $width  = filter_input(INPUT_GET, 'width') ?? 0;
     $height = filter_input(INPUT_GET, 'height') ?? 0;
@@ -83,10 +85,9 @@ try {
         $height = $config->defaultHeight;
     }
 
-    Resource::$schema = $config->schema;
-    $cachedItem       = $cache->getResponse([$width, $height, $id], $id);
-    $resMeta          = ResourceMeta::deserialize($cachedItem->body);
-    $res              = new Resource($resMeta, $config, $log);
+    $cachedItem = $cache->getResponse([$width, $height, $id], $id);
+    $resMeta    = ResourceMeta::deserialize($cachedItem->body);
+    $res        = new Resource($resMeta, $config, $log);
 
     $path = $res->getThumbnailPath($width, $height);
     header('Content-Size: ' . filesize($path));

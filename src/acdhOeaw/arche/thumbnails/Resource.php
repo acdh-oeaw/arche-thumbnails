@@ -50,24 +50,21 @@ class Resource {
     const DEFAULT_MAX_FILE_SIZE_MB = 100;
     const REAL_URL_PROP            = 'http://real/url';
 
-    static public LoggerInterface $logStatic;
-    static public object $schema;
-
     /**
      * Gets the requested repository resource metadata and converts it to the thumbnail's
      * service ResourceMeta object.
      * 
      */
-    static public function cacheHandler(RepoResourceInterface $res, array $param): ResponseCacheItem {
+    static public function cacheHandler(RepoResourceInterface $res, array $param, object $schema, ?LoggerInterface $log = null): ResponseCacheItem {
         $resUri = $res->getUri();
         $graph  = $res->getGraph()->getDataset();
 
         // handle isTitleResourceOf
-        $titleImageProp = DF::namedNode(self::$schema->titleImage);
-        $idProp         = DF::namedNode(self::$schema->id);
+        $titleImageProp = DF::namedNode($schema->titleImage);
+        $idProp         = DF::namedNode($schema->id);
         $titleImageSbj  = $graph->getSubject(new PT($titleImageProp, $resUri));
         if ($titleImageSbj !== null) {
-            self::$logStatic->info("titleImageOf found");
+            $log?->info("titleImageOf found");
             // replace resource metadata with the title image metadata but keep the original resource ids
             $graph->forEach(function (QuadInterface $q) use ($resUri, $idProp,
                                                              $titleImageSbj,
@@ -90,7 +87,7 @@ class Resource {
         }
 
         // return ResourceMeta
-        $resourceMeta = ResourceMeta::fromDatasetNode($res->getGraph(), self::$schema);
+        $resourceMeta = ResourceMeta::fromDatasetNode($res->getGraph(), $schema);
         return new ResponseCacheItem($resourceMeta->serialize());
     }
 
