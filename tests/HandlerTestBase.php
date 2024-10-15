@@ -26,6 +26,7 @@
 
 namespace acdhOeaw\arche\thumbnails\tests;
 
+use Imagick;
 use acdhOeaw\arche\thumbnails\handler\HandlerInterface;
 
 /**
@@ -68,5 +69,15 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
 
     public function testMaintainsAspectRatio(): void {
         $this->assertEquals(static::MAINTAINS_ASPECT_RATIO, self::$handler->maintainsAspectRatio());
+    }
+
+    protected function assertImagesEqual(string $path1, string $path2): void {
+        $i = new Imagick();
+        $i->readImage($path1);
+        $i->writeImage('bmp:' . $path1 . '.bmp');
+        $i = new Imagick();
+        $i->readImage($path2);
+        $i->writeImage('bmp:' . $path2 . '.bmp');
+        $this->assertFileEquals($path1 . '.bmp', $path2 . '.bmp');
     }
 }
