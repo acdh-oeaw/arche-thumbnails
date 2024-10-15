@@ -74,7 +74,7 @@ try {
     $searchConfig->resourceProperties     = array_values((array) $config->schema);
     $searchConfig->relativesProperties    = $searchConfig->resourceProperties;
 
-    $clbck = fn($a, $b) => Resource::cacheHandler($a, $b, $log, $config->schema);
+    $clbck = fn($a, $b) => Resource::cacheHandler($a, $b, $config->schema, $log);
     $ttl   = $config->cache->ttl;
     $cache = new ResponseCache($cache, $clbck, $ttl->resource, $ttl->response, $repos, $searchConfig, $log);
 
