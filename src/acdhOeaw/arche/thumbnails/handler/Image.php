@@ -37,8 +37,11 @@ use acdhOeaw\arche\thumbnails\Resource;
  */
 class Image implements HandlerInterface {
 
+    /**
+     * 
+     * @phpstan-ignore constructor.unusedParameter
+     */
     public function __construct(object $config) {
-        
     }
 
     /**

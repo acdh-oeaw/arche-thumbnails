@@ -54,8 +54,11 @@ class Resource {
      * Gets the requested repository resource metadata and converts it to the thumbnail's
      * service ResourceMeta object.
      * 
+     * @param array<mixed> $param
      */
-    static public function cacheHandler(RepoResourceInterface $res, array $param, object $schema, ?LoggerInterface $log = null): ResponseCacheItem {
+    static public function cacheHandler(RepoResourceInterface $res,
+                                        array $param, object $schema,
+                                        ?LoggerInterface $log = null): ResponseCacheItem {
         $resUri = $res->getUri();
         $graph  = $res->getGraph()->getDataset();
 

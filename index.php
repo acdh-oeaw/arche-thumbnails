@@ -47,6 +47,7 @@ $logId = sprintf("%08d", rand(0, 99999999));
 $tmpl  = "{TIMESTAMP}:$logId:{LEVEL}\t{MESSAGE}";
 $log   = new Log($config->log->file, $config->log->level, $tmpl);
 try {
+    $t0      = microtime(true);
     $id      = $_GET['id'] ?? 'no identifer provided';
     $log->info("Getting thumbnail for $id");
     $allowed = false;
@@ -93,7 +94,7 @@ try {
     header('Content-Size: ' . filesize($path));
     header('Content-Type: image/png');
     readfile($path);
-    $log->info("End");
+    $log->info("Ended in " . round(microtime(true) - $t0, 3) . " s");
 } catch (\Throwable $e) {
     $code              = $e->getCode();
     $ordinaryException = $e instanceof ThumbnailException || $e instanceof NotFound;
@@ -110,4 +111,3 @@ try {
         echo "Internal Server Error\n";
     }
 }
-

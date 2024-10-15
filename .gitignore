@@ -7,3 +7,5 @@
 /log
 /assets
 /build/docroot
+/build/logs
+/.phpunit.cache

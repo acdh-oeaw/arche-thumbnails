@@ -25,7 +25,13 @@
             "acdhOeaw\\": "src/acdhOeaw"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "acdhOeaw\\arche\\thumbnails\\tests\\": "tests"
+        }
+    },
     "require-dev": {
-        "phpstan/phpstan": "*"
+        "phpstan/phpstan": "*",
+        "phpunit/phpunit": "^11.4"
     }
 }
