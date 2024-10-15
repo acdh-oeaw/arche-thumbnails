@@ -1,5 +1,10 @@
 # Repo-thumbnails
 
+![Build status](https://github.com/acdh-oeaw/arche-thumbnails/workflows/deploy/badge.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/acdh-oeaw/arche-thumbnails/badge.svg?branch=master)](https://coveralls.io/github/acdh-oeaw/arche-thumbnails?branch=master)
+[![License](https://poser.pugx.org/acdh-oeaw/arche-thumbnails/license)](https://packagist.org/packages/acdh-oeaw/arche-thumbnails)
+
+
 An ARCHE dissemination service providing thumbnails for resources (so they can be nicely displayed in the GUI).
 
 For images it simply provides thumbnails and for another resources it tries to do its best either by finding a connected image (e.g. with `acdh:hasTitleImage` metadata link) or by rendering a content fragment (for text resources) or by providing an icon based on the resource type.
