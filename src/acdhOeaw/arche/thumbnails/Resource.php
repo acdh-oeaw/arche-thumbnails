@@ -48,6 +48,7 @@ use acdhOeaw\arche\thumbnails\handler\HandlerInterface;
 class Resource {
 
     const DEFAULT_MAX_FILE_SIZE_MB = 100;
+    const REAL_URL_PROP            = 'http://real/url';
 
     static public LoggerInterface $logStatic;
     static public object $schema;
@@ -57,8 +58,7 @@ class Resource {
      * service ResourceMeta object.
      * 
      */
-    static public function cacheHandler(RepoResourceInterface $res,
-                                        array $param): ResponseCacheItem {
+    static public function cacheHandler(RepoResourceInterface $res, array $param): ResponseCacheItem {
         $resUri = $res->getUri();
         $graph  = $res->getGraph()->getDataset();
 
@@ -76,8 +76,7 @@ class Resource {
                     return $q;
                 } elseif ($q->getSubject()->equals($titleImageSbj)) {
                     if ($q->getPredicate()->equals($titleImageProp)) {
-                        // semantically incorrect but allows to keep the real URI easily
-                        return $q->withSubject($resUri)->withObject($titleImageSbj);
+                        return DF::quad($resUri, DF::namedNode(self::REAL_URL_PROP), $titleImageSbj);
                     } else {
                         return $q->withSubject($resUri);
                     }
@@ -208,6 +207,8 @@ class Resource {
 
         if (!file_exists($pathTmp)) {
             throw new NoSuchFileException("Thumbnail was not properly generated", 500);
+        } else {
+            $this->log?->info("Thumbnail generated");
         }
 
         if (!file_exists($path)) {
@@ -246,7 +247,7 @@ class Resource {
         if ($this->meta->mime === '') {
             return;
         }
-        
+
         $this->log?->info("Downloading " . $this->meta->realUrl);
 
         $dir = dirname($path);

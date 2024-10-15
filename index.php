@@ -92,6 +92,7 @@ try {
     header('Content-Size: ' . filesize($path));
     header('Content-Type: image/png');
     readfile($path);
+    $log->info("End");
 } catch (\Throwable $e) {
     $code              = $e->getCode();
     $ordinaryException = $e instanceof ThumbnailException || $e instanceof NotFound;
