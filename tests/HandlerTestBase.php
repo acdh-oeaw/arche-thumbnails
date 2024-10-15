@@ -72,8 +72,9 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * Images generated on different platforms may differ a little, thus
-     * we first convert them to BMP and then compare byte-to-byte allo
+     * Images generated on different platforms may differ a little when text
+     * rendering is involved, thus we first convert them to BMP and then compare 
+     * byte-to-byte allowing configurable discrepancy ratio
      */
     protected function assertImagesEqual(string $path1, string $path2,
                                          float $minRatio = 1.0): void {
@@ -91,6 +92,6 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
         for ($i = 0; $i < $size; $i++) {
             $match += $i1[$i] === $i2[$i];
         }
-        $this->assertGreaterThanOrEqual($minRatio, $match / $count);
+        $this->assertGreaterThanOrEqual($minRatio, $match / $size);
     }
 }
