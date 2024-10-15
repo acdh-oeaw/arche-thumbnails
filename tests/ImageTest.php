@@ -44,6 +44,6 @@ class ImageTest extends HandlerTestBase {
         $res     = $this->createStub(Resource::class);
         $res->method('getRefFilePath')->willReturn(__DIR__ . '/data/image_input.jpg');
         self::$handler->createThumbnail($res, 100, 100, self::TMP_FILE);
-        $this->assertImagesEqual(__DIR__ . '/data/image_output.png', self::TMP_FILE);
+        $this->assertImagesEqual(__DIR__ . '/data/image_output.png', self::TMP_FILE, 1.0);
     }
 }

@@ -71,7 +71,12 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(static::MAINTAINS_ASPECT_RATIO, self::$handler->maintainsAspectRatio());
     }
 
-    protected function assertImagesEqual(string $path1, string $path2): void {
+    /**
+     * Images generated on different platforms may differ a little, thus
+     * we first convert them to BMP and then compare byte-to-byte allo
+     */
+    protected function assertImagesEqual(string $path1, string $path2,
+                                         float $minRatio = 1.0): void {
         $i     = new Imagick();
         $i->readImage($path1);
         $i->writeImage('bmp:' . $path1 . '.bmp');
@@ -86,6 +91,6 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
         for ($i = 0; $i < $size; $i++) {
             $match += $i1[$i] === $i2[$i];
         }
-        $this->assertEquals($size, $match);
+        $this->assertGreaterThanOrEqual($minRatio, $match / $count);
     }
 }
