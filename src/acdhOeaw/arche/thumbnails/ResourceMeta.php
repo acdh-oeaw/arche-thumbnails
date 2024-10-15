@@ -37,10 +37,11 @@ use termTemplates\PredicateTemplate as PT;
  */
 class ResourceMeta {
 
-    static public function fromDatasetNode(DatasetNodeInterface $meta, object $schema): self {
+    static public function fromDatasetNode(DatasetNodeInterface $meta,
+                                           object $schema): self {
         $resMeta           = new self();
         $resMeta->url      = (string) $meta->getNode();
-        $resMeta->realUrl  = $meta->getObjectValue(new PT($schema->titleImage)) ?? $resMeta->url;
+        $resMeta->realUrl  = $meta->getObjectValue(new PT(Resource::REAL_URL_PROP)) ?? $resMeta->url;
         $resMeta->repoHash = $meta->getObjectValue(new PT($schema->hash)) ?? '__no hash__';
         $resMeta->mime     = $meta->getObjectValue(new PT($schema->mime)) ?? '';
         $resMeta->sizeMb   = ((int) $meta->getObjectValue(new PT($schema->size))) >> 20;
