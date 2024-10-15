@@ -72,12 +72,20 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
     }
 
     protected function assertImagesEqual(string $path1, string $path2): void {
-        $i = new Imagick();
+        $i     = new Imagick();
         $i->readImage($path1);
         $i->writeImage('bmp:' . $path1 . '.bmp');
-        $i = new Imagick();
+        $i     = new Imagick();
         $i->readImage($path2);
         $i->writeImage('bmp:' . $path2 . '.bmp');
-        $this->assertFileEquals($path1 . '.bmp', $path2 . '.bmp');
+        $i1    = file_get_contents($path1 . '.bmp');
+        $i2    = file_get_contents($path2 . '.bmp');
+        $this->assertEquals(filesize($path1 . '.bmp'), filesize($path2 . '.bmp'));
+        $size  = filesize($path1 . '.bmp');
+        $match = 0;
+        for ($i = 0; $i < $size; $i++) {
+            $match += $i1[$i] === $i2[$i];
+        }
+        $this->assertEquals($size, $match);
     }
 }
