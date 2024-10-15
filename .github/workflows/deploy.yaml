@@ -18,6 +18,8 @@ jobs:
           php-version: 8.3
           extensions: json,pcre,yaml,imagick,pdo,pdo_sqlite,pdo_pgsql
           coverage: xdebug
+      - name: fonts
+        run: sudo apt install -y gsfonts
       - name: composer
         run: composer update
       - name: phpstan level 4
