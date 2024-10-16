@@ -1,6 +1,6 @@
 # Repo-thumbnails
 
-![Build status](https://github.com/acdh-oeaw/arche-thumbnails/workflows/testAndDeploy/badge.svg?branch=master)
+[![Build status](https://github.com/acdh-oeaw/arche-thumbnails/actions/workflows/deploy.yaml/badge.svg)](https://github.com/acdh-oeaw/arche-thumbnails/actions/workflows/deploy.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/acdh-oeaw/arche-thumbnails/badge.svg?branch=master)](https://coveralls.io/github/acdh-oeaw/arche-thumbnails?branch=master)
 [![License](https://poser.pugx.org/acdh-oeaw/arche-thumbnails/license)](https://packagist.org/packages/acdh-oeaw/arche-thumbnails)
 
