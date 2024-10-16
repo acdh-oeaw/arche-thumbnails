@@ -78,25 +78,20 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
      */
     protected function assertImagesEqual(string $path1, string $path2,
                                          float $minRatio = 1.0): void {
-        $i1bmp  = $path1 . '.bmp';
-        $i2bmp  = $path2 . '.bmp';
-        $i      = new Imagick();
-        $i->readImage($path1);
-        $i->writeImage("bmp:$i1bmp");
-        $i      = new Imagick();
-        $i->readImage($path2);
-        $i->writeImage("bmp:$i2bmp");
-        $i1     = file_get_contents($i1bmp);
-        $i2     = file_get_contents($i2bmp);
-        $i1size = filesize($i1bmp);
-        $i2size = filesize($i2bmp);
-        unlink($i1bmp);
-        unlink($i2bmp);
-        $this->assertEquals($i1size, $i2size);
-        $match  = 0;
-        for ($i = 0; $i < $i1size; $i++) {
-            $match += $i1[$i] === $i2[$i];
+        $i1    = new Imagick();
+        $i1->readImage($path1);
+        $i1->setFormat('pbm');
+        $i1b   = $i1->getImageBlob();
+        $i2    = new Imagick();
+        $i2->readImage($path2);
+        $i2->setFormat('pbm');
+        $i2b   = $i2->getImageBlob();
+        $this->assertEquals(strlen($i1b), strlen($i2b));
+        $size  = strlen($i1b);
+        $match = 0;
+        for ($i = 0; $i < $size; $i++) {
+            $match += $i1b[$i] === $i2b[$i];
         }
-        $this->assertGreaterThanOrEqual($minRatio, $match / $i1size);
+        $this->assertGreaterThanOrEqual($minRatio, $match / $size);
     }
 }
