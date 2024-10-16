@@ -141,7 +141,7 @@ class Resource {
      */
     public function getRefFilePath(): string {
         // direct local access
-        foreach ($this->config->localAccess as $nmsp => $nmspCfg) {
+        foreach ((array) ($this->config->localAccess ?? []) as $nmsp => $nmspCfg) {
             if (str_starts_with($this->meta->realUrl, $nmsp)) {
                 $id     = (int) preg_replace('`^.*/`', '', $this->meta->realUrl);
                 $level  = $nmspCfg->level;

@@ -6,7 +6,7 @@ log:
   file: /var/www/html/log
   level: debug
 cache:
-  dir: /var/www/html/cache
+  dir: /tmp/__thumbnailtest__
   ttl:
     resource: 3600     # 1 hour
     response: 31536000 # 1 year
@@ -23,7 +23,7 @@ allowedNmsp:
 - https://hdl.handle.net/
 localAccess:
   https://arche.acdh.oeaw.ac.at/api/:
-    dir: /arche
+    dir: /tmp/__thumbnailtest__
     level: 2
 schema:
   id: https://vocabs.acdh.oeaw.ac.at/schema#hasIdentifier
