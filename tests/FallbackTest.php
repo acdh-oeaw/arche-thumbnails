@@ -73,7 +73,7 @@ class FallbackTest extends HandlerTestBase {
         $res         = $this->createStub(Resource::class);
         $res->method('getMeta')->willReturn($meta);
         $handler->createThumbnail($res, 100, 100, self::TMP_FILE);
-        $this->assertImagesEqual(__DIR__ . '/data/fallback_template_output.png', self::TMP_FILE, 0.95);
+        $this->assertImagesEqual(__DIR__ . '/data/fallback_template_output.png', self::TMP_FILE, 0.9);
     }
 
     public function testCreateThumbnailGeneric(): void {

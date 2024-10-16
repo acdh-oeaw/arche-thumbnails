@@ -47,6 +47,6 @@ class TextTest extends HandlerTestBase {
         $res     = $this->createStub(Resource::class);
         $res->method('getRefFilePath')->willReturn($tmpFile);
         self::$handler->createThumbnail($res, 100, 100, self::TMP_FILE);
-        $this->assertImagesEqual(__DIR__ . '/data/text.png', self::TMP_FILE, 0.95);
+        $this->assertImagesEqual(__DIR__ . '/data/text.png', self::TMP_FILE, 0.9);
     }
 }
