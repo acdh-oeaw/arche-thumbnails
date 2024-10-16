@@ -29,7 +29,6 @@ jobs:
         run: composer update
       - name: phpstan level 4
         run: vendor/bin/phpstan analyze -l 4 src/ index.php
-      #- uses: mxschmitt/action-tmate@v3
       - name: phpunit
         run: XDEBUG_MODE=coverage vendor/bin/phpunit tests
       - name: prepare arche-prod and arche-cur configs
@@ -48,23 +47,23 @@ jobs:
           rm -fR vendor
           mkdir build/docroot && cp -R `ls -1 | grep -v ^build` build/docroot/ && cp build/config/arche.yaml build/docroot/config.yaml && cp -R build/assets/arche build/docroot/assets && mkdir build/docroot/cache && mkdir build/docroot/tmp && cp .htaccess build/docroot/
           docker build --rm -t "acdhch/$RANCHER_NAMESPACE:latest" --build-arg VARIANT=production --label "buildUrl=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" build
-      - uses: mxschmitt/action-tmate@v3
-      #- name: test image
-      #  run: |
-      #    docker run -d --name "$RANCHER_NAMESPACE" -p 8080:80 "acdhch/$RANCHER_NAMESPACE:latest"
-      #    sleep 1
-      #    # separate title image - Image class
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms?width=150'
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms?width=150'
-      #    # collection - Fallback class - no thumbnail
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/editions?width=150' | grep '404 Not Found'
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/editions?width=150' | grep '404 Not Found'
-      #    # text file - Fallback class - no thumbnail
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml?width=150' | grep '404 Not Found'
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml?width=150' | grep '404 Not Found'
-      #    # image - Image class
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif'
-      #    curl -f -i 'http://127.0.0.1:8080/id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif'
+      #- uses: mxschmitt/action-tmate@v3
+      - name: test image
+        run: |
+          docker run -d --name "$RANCHER_NAMESPACE" -v `pwd`/tests/config_image.yaml:/var/www/html/config.yaml -p 8080:80 "acdhch/$RANCHER_NAMESPACE:latest"
+          sleep 1
+          # separate title image - Image class
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms&width=150' > /dev/null
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms&width=150' > /dev/null
+          # collection - Fallback class - no thumbnail
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/editions&width=150' | grep '404 Not Found'
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/editions&width=150' | grep '404 Not Found'
+          # text file - Fallback class - no thumbnail
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml&width=150' | grep '404 Not Found'
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/t__01_VMS_1854_TEI_AW_26-01-21-TEI-P5.xml&width=150' | grep '404 Not Found'
+          # image - Image class
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif' > /dev/null
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif' > /dev/null
       - name: authorize against docker hub
         if: github.event_name == 'release' && github.event.action == 'published' || inputs.deploy
         uses: docker/login-action@v3
@@ -86,5 +85,3 @@ jobs:
           rm -fR composer.json composer.lock vendor
           composer require php-coveralls/php-coveralls
           php vendor/bin/php-coveralls -v
-
-
