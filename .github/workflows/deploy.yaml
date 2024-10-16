@@ -1,6 +1,11 @@
 name: deploy on rancher
 on:
-  workflow_dispatch: ~
+  workflow_dispatch:
+    inputs:
+      deploy:
+        type: boolean
+        description: Deploy if not a release
+        default: false
   push: ~
   release:
     types: [published]
@@ -10,11 +15,6 @@ env:
   RANCHER_NAMESPACE: arche-thumbnails
 jobs:
   testAndDeploy:
-    inputs:
-      deploy:
-        type: boolean
-        description: Deploy if not a release
-        default: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
