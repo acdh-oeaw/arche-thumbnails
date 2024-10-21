@@ -58,7 +58,7 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
 
     public function tearDown(): void {
         foreach (glob(self::TMP_FILE . "*") as $i) {
-            //unlink($i);
+            unlink($i);
         }
     }
 
