@@ -30,10 +30,10 @@ use acdhOeaw\arche\lib\SearchConfig;
 use acdhOeaw\arche\lib\exception\NotFound;
 use acdhOeaw\arche\lib\dissCache\CachePdo;
 use acdhOeaw\arche\lib\dissCache\ResponseCache;
-use acdhOeaw\arche\thumbnails\Resource;
-use acdhOeaw\arche\thumbnails\ResourceMeta;
 use acdhOeaw\arche\lib\dissCache\RepoWrapperGuzzle;
 use acdhOeaw\arche\lib\dissCache\RepoWrapperRepoInterface;
+use acdhOeaw\arche\thumbnails\Resource;
+use acdhOeaw\arche\thumbnails\ResourceMeta;
 use acdhOeaw\arche\thumbnails\ThumbnailException;
 
 header('Access-Control-Allow-Origin: *');
@@ -86,7 +86,7 @@ try {
         $height = $config->defaultHeight;
     }
 
-    $cachedItem = $cache->getResponse([$width, $height, $id], $id);
+    $cachedItem = $cache->getResponse([$width, $height], $id);
     $resMeta    = ResourceMeta::deserialize($cachedItem->body);
     $res        = new Resource($resMeta, $config, $log);
 

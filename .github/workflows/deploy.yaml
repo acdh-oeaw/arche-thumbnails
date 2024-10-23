@@ -30,7 +30,7 @@ jobs:
       - name: phpstan level 4
         run: vendor/bin/phpstan analyze -l 4 src/ index.php
       - name: phpunit
-        run: XDEBUG_MODE=coverage vendor/bin/phpunit tests
+        run: XDEBUG_MODE=coverage vendor/bin/phpunit --display-deprecations --display-phpunit-deprecations --display-notices --display-warnings
       - name: prepare arche-prod and arche-cur configs
         run: |
           mkdir tmp && cd tmp 
