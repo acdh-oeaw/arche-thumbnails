@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: fonts
         run: sudo apt install -y gsfonts
-      uses: acdh-oeaw/arche_cicd_start_action@main
+      - uses: acdh-oeaw/arche_cicd_start_action@main
         with:
           phpExtensions: json,pcre,yaml,imagick,pdo,pdo_sqlite,pdo_pgsql
           phpstanLevel: 4
