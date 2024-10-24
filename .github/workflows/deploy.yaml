@@ -45,6 +45,9 @@ jobs:
           # image - Image class
           curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif' > /dev/null
           curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/hanslick-vms/vms_1854_002.tif' > /dev/null
+          # image - unauthorize
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/diauma/Scans/Diverse_0002.tif' | grep '401 Unauthorized'
+          curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/diauma/Scans/Diverse_0002.tif' | grep '401 Unauthorized'
       - uses: acdh-oeaw/arche_cicd_finish_action@main
         with:
           pushAndRedeploy: ${{ github.event_name == 'release' && github.event.action == 'published' || inputs.deploy }}
