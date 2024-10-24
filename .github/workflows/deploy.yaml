@@ -24,6 +24,7 @@ jobs:
           phpVersion: 8.2
           phpExtensions: json,pcre,yaml,imagick,pdo,pdo_sqlite,pdo_pgsql
           phpstanLevel: 4
+          prepareRepoConfig: true
       - name: build docker image
         run: |
           mkdir build/docroot && cp -R `ls -1 | grep -v ^build` build/docroot/ && cp build/config/arche.yaml build/docroot/config.yaml && cp -R build/assets/arche build/docroot/assets && mkdir build/docroot/cache && mkdir build/docroot/tmp && cp .htaccess build/docroot/
