@@ -116,6 +116,10 @@ class Resource {
     }
 
     public function getThumbnailPath(int $width, int $height): string {
+        if (count(array_intersect($this->meta->aclRead, $this->config->allowedAclRead)) === 0) {
+            throw new ThumbnailException("Unauthorized\n", 401);
+        }
+        
         $path = $this->getFilePath($width, $height);
 
         // if the thumbnail exists and is up to date, just serve it

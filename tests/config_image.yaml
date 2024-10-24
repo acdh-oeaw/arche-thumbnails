@@ -28,6 +28,9 @@ schema:
   hash: https://vocabs.acdh.oeaw.ac.at/schema#hasHash
   titleImage: https://vocabs.acdh.oeaw.ac.at/schema#isTitleImageOf
   class: http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+  aclRead: http://www.w3.org/1999/02/22-rdf-syntax-ns#read
+allowedAclRead:
+- public
 mimeHandlers:
   - class: \acdhOeaw\arche\thumbnails\handler\Image
     config: ~

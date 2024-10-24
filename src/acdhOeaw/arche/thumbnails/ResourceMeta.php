@@ -47,6 +47,7 @@ class ResourceMeta {
         $resMeta->sizeMb   = ((int) $meta->getObjectValue(new PT($schema->size))) >> 20;
         $resMeta->class    = $meta->getObjectValue(new PT($schema->class)) ?? '__no class__';
         $resMeta->modDate  = new DateTimeImmutable($meta->getObjectValue(new PT($schema->modDate)));
+        $resMeta->aclRead  = $meta->listObjects(new PT($schema->aclRead))->getValues();
         return $resMeta;
     }
 
@@ -61,6 +62,11 @@ class ResourceMeta {
     public int $sizeMb   = 0;
     public string $class    = '';
     public DateTimeImmutable $modDate;
+    /**
+     * 
+     * @var array<string>
+     */
+    public array $aclRead  = [];
 
     public function serialize(): string {
         return serialize($this);
