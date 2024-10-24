@@ -2,8 +2,6 @@
 
 [![Build status](https://github.com/acdh-oeaw/arche-thumbnails/actions/workflows/deploy.yaml/badge.svg)](https://github.com/acdh-oeaw/arche-thumbnails/actions/workflows/deploy.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/acdh-oeaw/arche-thumbnails/badge.svg?branch=master)](https://coveralls.io/github/acdh-oeaw/arche-thumbnails?branch=master)
-[![License](https://poser.pugx.org/acdh-oeaw/arche-thumbnails/license)](https://packagist.org/packages/acdh-oeaw/arche-thumbnails)
-
 
 An ARCHE dissemination service providing thumbnails for resources (so they can be nicely displayed in the GUI).
 
