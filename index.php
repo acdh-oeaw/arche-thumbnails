@@ -24,90 +24,45 @@
  * THE SOFTWARE.
  */
 
-use zozlak\logging\Log;
-use acdhOeaw\arche\lib\RepoDb;
-use acdhOeaw\arche\lib\SearchConfig;
-use acdhOeaw\arche\lib\exception\NotFound;
-use acdhOeaw\arche\lib\dissCache\CachePdo;
-use acdhOeaw\arche\lib\dissCache\ResponseCache;
-use acdhOeaw\arche\lib\dissCache\RepoWrapperGuzzle;
-use acdhOeaw\arche\lib\dissCache\RepoWrapperRepoInterface;
+use acdhOeaw\arche\lib\dissCache\Service;
 use acdhOeaw\arche\thumbnails\Resource;
 use acdhOeaw\arche\thumbnails\ResourceMeta;
-use acdhOeaw\arche\thumbnails\ThumbnailException;
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
 
 require_once 'vendor/autoload.php';
 
-$config = json_decode(json_encode(yaml_parse_file('config.yaml')));
+$t0 = microtime(true);
 
-$logId = sprintf("%08d", rand(0, 99999999));
-$tmpl  = "{TIMESTAMP}:$logId:{LEVEL}\t{MESSAGE}";
-$log   = new Log($config->log->file, $config->log->level, $tmpl);
-try {
-    $t0      = microtime(true);
-    $id      = $_GET['id'] ?? 'no identifer provided';
-    $log->info("Getting thumbnail for $id");
-    $allowed = false;
-    foreach ($config->allowedNmsp as $i) {
-        if (str_starts_with($id, $i)) {
-            $allowed = true;
-            break;
-        }
-    }
-    if (!$allowed) {
-        throw new ThumbnailException("Requested resource $id not in allowed namespace", 400);
-    }
+$service = new Service(__DIR__ . '/config.yaml');
 
-    $cache = new CachePdo($config->db);
+$config = $service->getConfig();
+$log    = $service->getLog();
+$clbck  = fn($res, $param) => Resource::cacheHandler($res, $param, $config->schema, $log);
+$service->setCallback($clbck);
 
-    $repos = [];
-    foreach ($config->repoDb ?? [] as $i) {
-        $repos[] = new RepoWrapperRepoInterface(RepoDb::factory($i), true);
-    }
-    $repos[] = new RepoWrapperGuzzle(false);
-
-    $searchConfig                         = new SearchConfig();
-    $searchConfig->metadataMode           = '1_0_0_0';
-    $searchConfig->metadataParentProperty = $config->schema->titleImage;
-    $searchConfig->resourceProperties     = array_values((array) $config->schema);
-    $searchConfig->relativesProperties    = $searchConfig->resourceProperties;
-
-    $clbck = fn($a, $b) => Resource::cacheHandler($a, $b, $config->schema, $log);
-    $ttl   = $config->cache->ttl;
-    $cache = new ResponseCache($cache, $clbck, $ttl->resource, $ttl->response, $repos, $searchConfig, $log);
-
-    $width  = filter_input(INPUT_GET, 'width') ?? 0;
-    $height = filter_input(INPUT_GET, 'height') ?? 0;
-    if ($width === 0 && $height === 0) {
-        $width  = $config->defaultWidth;
-        $height = $config->defaultHeight;
-    }
-
-    $cachedItem = $cache->getResponse([$width, $height], $id);
-    $resMeta    = ResourceMeta::deserialize($cachedItem->body);
-    $res        = new Resource($resMeta, $config, $log);
-
-    $path = $res->getThumbnailPath($width, $height);
-    header('Content-Size: ' . filesize($path));
-    header('Content-Type: image/png');
-    readfile($path);
-    $log->info("Ended in " . round(microtime(true) - $t0, 3) . " s");
-} catch (\Throwable $e) {
-    $code              = $e->getCode();
-    $ordinaryException = $e instanceof ThumbnailException || $e instanceof NotFound;
-    $logMsg            = "$code: " . $e->getMessage() . ($ordinaryException ? '' : "\n" . $e->getFile() . ":" . $e->getLine() . "\n" . $e->getTraceAsString());
-    $log->error($logMsg);
-
-    if ($code < 400 || $code >= 500) {
-        $code = 500;
-    }
-    http_response_code($code);
-    if ($ordinaryException) {
-        echo $e->getMessage() . "\n";
-    } else {
-        echo "Internal Server Error\n";
-    }
+$width  = filter_input(INPUT_GET, 'width') ?? 0;
+$height = filter_input(INPUT_GET, 'height') ?? 0;
+if ($width === 0 && $height === 0) {
+    $width  = $config->defaultWidth;
+    $height = $config->defaultHeight;
 }
+$response = $service->serveRequest($_GET['id'] ?? '', [$width, $height]);
+if ($response->responseCode === 200) {
+    try {
+        $resMeta = ResourceMeta::deserialize($response->body);
+        $res     = new Resource($resMeta, $config, $log);
+
+        $path = $res->getThumbnailPath($width, $height);
+        header('Content-Size: ' . filesize($path));
+        header('Content-Type: image/png');
+        readfile($path);
+        $log->info("Thumbnail served in " . round(microtime(true) - $t0, 3) . " s");
+    } catch (Throwable $e) {
+        $service->processException($e)->send();
+    }
+} else {
+    $response->send();
+}
+

@@ -31,6 +31,6 @@ namespace acdhOeaw\arche\thumbnails;
  *
  * @author zozlak
  */
-class ThumbnailException extends \Exception {
+class ThumbnailException extends \acdhOeaw\arche\lib\dissCache\ServiceException {
     
 }

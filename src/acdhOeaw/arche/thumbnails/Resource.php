@@ -145,7 +145,7 @@ class Resource {
      * Returns the path to the full resolution image.
      * Downloads the resource content if needed.
      */
-    public function getRefFilePath(): string {
+    public function     getRefFilePath(): string {
         // direct local access
         foreach ((array) ($this->config->localAccess ?? []) as $nmsp => $nmspCfg) {
             if (str_starts_with($this->meta->realUrl, $nmsp)) {

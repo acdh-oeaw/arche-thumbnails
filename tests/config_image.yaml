@@ -1,24 +1,45 @@
-db: sqlite:/var/www/html/db.sqlite
-defaultWidth: 100
-defaultHeight: 100
-maxFileSizeMb: 100
-log:
-  file: /var/www/html/log
-  level: debug
-cache:
-  dir: /var/www/html/cache
+dissCacheService:
+  db: sqlite:/var/www/html/db.sqlite
+  log:
+    file: /var/www/html/log
+    level: debug
   ttl:
     resource: 3600     # 1 hour
     response: 31536000 # 1 year
+  repoDb: []
+  allowedNmsp:
+  - https://id.acdh.oeaw.ac.at/
+  - https://arche.acdh.oeaw.ac.at/api/
+  - https://arche-curation.acdh-dev.oeaw.ac.at/api/
+  - https://arche-dev.acdh-dev.oeaw.ac.at.at/api/
+  - https://hdl.handle.net/
+  metadataMode: 1_0_0_0
+  parentProperty: https://vocabs.acdh.oeaw.ac.at/schema#isTitleImageOf
+  resourceProperties:
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasIdentifier
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasUpdatedDate
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasFormat
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasRawBinarySize
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasHash
+  - https://vocabs.acdh.oeaw.ac.at/schema#isTitleImageOf
+  - http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+  - https://vocabs.acdh.oeaw.ac.at/schema#aclRead
+  relativesProperties:
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasIdentifier
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasUpdatedDate
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasFormat
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasRawBinarySize
+  - https://vocabs.acdh.oeaw.ac.at/schema#hasHash
+  - https://vocabs.acdh.oeaw.ac.at/schema#isTitleImageOf
+  - http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+  - https://vocabs.acdh.oeaw.ac.at/schema#aclRead
+defaultWidth: 100
+defaultHeight: 100
+maxFileSizeMb: 100
+cache:
+  dir: /var/www/html/cache
   clearMode: size # 'size' or 'time'
   maxSizeMb: 2000
-repoDb: []
-allowedNmsp:
-- https://id.acdh.oeaw.ac.at/
-- https://arche.acdh.oeaw.ac.at/api/
-- https://arche-curation.acdh-dev.oeaw.ac.at/api/
-- https://arche-dev.acdh-dev.oeaw.ac.at.at/api/
-- https://hdl.handle.net/
 localAccess: ~
 schema:
   id: https://vocabs.acdh.oeaw.ac.at/schema#hasIdentifier
