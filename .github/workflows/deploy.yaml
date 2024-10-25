@@ -48,6 +48,13 @@ jobs:
           # image - unauthorize
           curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/diauma/Scans/Diverse_0002.tif' | grep '401 Unauthorized'
           curl -f -i 'http://127.0.0.1:8080/?id=https://id.acdh.oeaw.ac.at/diauma/Scans/Diverse_0002.tif' | grep '401 Unauthorized'
+          # local access
+          docker rm -fv "$RANCHER_NAMESPACE"
+          curl https://arche.acdh.oeaw.ac.at/api/41951 > 41951
+          docker run -d --name "$RANCHER_NAMESPACE" -v `pwd`/tests/config_image_local.yaml:/var/www/html/config.yaml -v `pwd`/41951:/arche/41951 -p 8080:80 "acdhch/$RANCHER_NAMESPACE:latest"
+          sleep 1
+          curl -f -i 'http://127.0.0.1:8080/?id=https://arche.acdh.oeaw.ac.at/api/41951&width=150' > /dev/null
+          curl -f -i 'http://127.0.0.1:8080/?id=https://arche.acdh.oeaw.ac.at/api/41951&width=150' > /dev/null
       - uses: acdh-oeaw/arche_cicd_finish_action@main
         with:
           pushAndRedeploy: ${{ github.event_name == 'release' && github.event.action == 'published' || inputs.deploy }}
