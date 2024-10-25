@@ -69,6 +69,9 @@ class Resource {
         if ($titleImageSbj !== null) {
             $log?->info("titleImageOf found");
             // replace resource metadata with the title image metadata but keep the original resource ids
+            // start with removal of original resource triples but identifiers
+            // this has to be done first to avoid unexpected triple removal in forEach()
+            $graph->delete(fn(QuadInterface $q) => $q->getSubject()->equals($resUri) && !$q->getPredicate()->equals($idProp));
             $graph->forEach(function (QuadInterface $q) use ($resUri, $idProp,
                                                              $titleImageSbj,
                                                              $titleImageProp) {
@@ -145,7 +148,7 @@ class Resource {
      * Returns the path to the full resolution image.
      * Downloads the resource content if needed.
      */
-    public function     getRefFilePath(): string {
+    public function getRefFilePath(): string {
         // direct local access
         foreach ((array) ($this->config->localAccess ?? []) as $nmsp => $nmspCfg) {
             if (str_starts_with($this->meta->realUrl, $nmsp)) {
