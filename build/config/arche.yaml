@@ -44,7 +44,7 @@ cache:
   maxSizeMb: 2000
 localAccess:
   https://arche.acdh.oeaw.ac.at/api/:
-    dir: /tmp/__thumbnailtest__
+    dir: /arche
     level: 2
 schema:
   id: https://vocabs.acdh.oeaw.ac.at/schema#hasIdentifier
