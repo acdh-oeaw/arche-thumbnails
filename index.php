@@ -48,7 +48,7 @@ if ($width === 0 && $height === 0) {
     $width  = $config->defaultWidth;
     $height = $config->defaultHeight;
 }
-$response = $service->serveRequest($_GET['id'] ?? '', [$width, $height]);
+$response = $service->serveRequest($_GET['id'] ?? '', [$width, $height], $_GET['force'] ?? false);
 if ($response->responseCode === 0) {
     try {
         $resMeta = ResourceMeta::deserialize($response->body);
