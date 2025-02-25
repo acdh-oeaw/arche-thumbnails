@@ -51,18 +51,12 @@ if ($width === 0 && $height === 0) {
 $response = $service->serveRequest($_GET['id'] ?? '', [$width, $height], $_GET['force'] ?? false);
 if ($response->responseCode === 0) {
     try {
-        $resMeta = ResourceMeta::deserialize($response->body);
-        $res     = new Resource($resMeta, $config, $log);
-
-        $path = $res->getThumbnailPath($width, $height);
-        header('Content-Size: ' . filesize($path));
-        header('Content-Type: image/png');
-        readfile($path);
-        $log->info("Thumbnail served in " . round(microtime(true) - $t0, 3) . " s");
+        $resMeta  = ResourceMeta::deserialize($response->body);
+        $res      = new Resource($resMeta, $config, $log);
+        $response = $res->getResponse($width, $height);
     } catch (Throwable $e) {
-        $service->processException($e)->send();
+        $response = $service->processException($e);
     }
-} else {
-    $response->send();
 }
-
+$response->send();
+$log->info("Response served in " . round(microtime(true) - $t0, 3) . " s");

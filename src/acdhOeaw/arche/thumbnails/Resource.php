@@ -27,17 +27,15 @@
 namespace acdhOeaw\arche\thumbnails;
 
 use Throwable;
-use RuntimeException;
 use Psr\Log\LoggerInterface;
 use rdfInterface\QuadInterface;
 use quickRdf\DataFactory as DF;
 use termTemplates\PredicateTemplate as PT;
 use termTemplates\QuadTemplate as QT;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
 use acdhOeaw\arche\lib\dissCache\ResponseCacheItem;
+use acdhOeaw\arche\lib\dissCache\FileCache;
+use acdhOeaw\arche\lib\dissCache\FileCacheException;
 use acdhOeaw\arche\lib\RepoResourceInterface;
-use zozlak\logging\Logger;
 use acdhOeaw\arche\thumbnails\handler\HandlerInterface;
 
 /**
@@ -106,6 +104,7 @@ class Resource {
     private object $config;
     private ResourceMeta $meta;
     private LoggerInterface | null $log;
+    private string $refFilePath;
     private string $tmpId;
 
     public function __construct(ResourceMeta $meta, object $config,
@@ -118,19 +117,21 @@ class Resource {
         $this->log?->debug(json_encode($meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 
-    public function getThumbnailPath(int $width, int $height): string {
+    public function getResponse(int $width, int $height): ResponseCacheItem {
         $allowedRoles = array_intersect($this->meta->aclRead, $this->config->allowedAclRead);
         $allowedClass = in_array($this->meta->class, $this->config->allowedClasses);
         if (count($allowedRoles) === 0 && !$allowedClass) {
             throw new ThumbnailException("Unauthorized\n", 401);
         }
 
-        $path = $this->getFilePath($width, $height);
+        $path    = $this->getFilePath($width, $height);
+        $headers = ['Content-Type' => 'image/png'];
 
         // if the thumbnail exists and is up to date, just serve it
         if (file_exists($path) && filemtime($path) > $this->meta->modDate->getTimestamp()) {
             $this->log?->info("Serving $width x $height thumbnail from cache $path");
-            return $path;
+            $headers['Content-Size'] = (string) filesize($path);
+            return new ResponseCacheItem($path, 200, $headers, false, true);
         }
 
         $limit = $this->maxFileSizeMb ?? self::DEFAULT_MAX_FILE_SIZE_MB;
@@ -138,48 +139,28 @@ class Resource {
             throw new FileToLargeException("Resource size (" . $this->meta->sizeMb . " MB) exceeds the limit ($limit MB");
         }
 
-        $refFilePath = $this->getRefFilePath();
-        $this->generateThumbnail($path, $refFilePath, $width, $height);
-
-        return $path;
+        $this->generateThumbnail($path, $width, $height);
+        $headers['Content-Size'] = (string) filesize($path);
+        return new ResponseCacheItem($path, 200, $headers, false, true);
     }
 
-    /**
-     * Returns the path to the full resolution image.
-     * Downloads the resource content if needed.
-     */
     public function getRefFilePath(): string {
-        // direct local access
-        foreach ((array) ($this->config->localAccess ?? []) as $nmsp => $nmspCfg) {
-            if (str_starts_with($this->meta->realUrl, $nmsp)) {
-                $id     = (int) preg_replace('`^.*/`', '', $this->meta->realUrl);
-                $level  = $nmspCfg->level;
-                $path   = $nmspCfg->dir;
-                $idPart = $id;
-                while ($level > 0) {
-                    $path   .= sprintf('/%02d', $idPart % 100);
-                    $idPart = (int) ($idPart / 100);
-                    $level--;
-                }
-                $path .= '/' . $id;
-                return file_exists($path) ? $path : '';
+        if (!isset($this->refFilePath)) {
+            $fileCache = new FileCache($this->config->cache->dir, $this->log, (array) $this->config->localAccess);
+            try {
+                $this->refFilePath = $fileCache->getRefFilePath($this->meta->realUrl, $this->meta->mime);
+            } catch (FileCacheException $e) {
+                $this->refFilePath = '';
             }
         }
-
-        // cache access
-        $path = $this->getFilePath();
-        if (!file_exists($path)) {
-            $this->fetchResourceBinary($path);
-        }
-        return $path;
+        return $this->refFilePath;
     }
 
     public function getMeta(): ResourceMeta {
         return $this->meta;
     }
 
-    private function generateThumbnail(string $path, string $refPath,
-                                       int $width, int $height): void {
+    private function generateThumbnail(string $path, int $width, int $height): void {
         $this->initHandlers();
 
         // generate the thumbnail
@@ -188,6 +169,8 @@ class Resource {
             mkdir($dir, 0700, true);
         }
         $pathTmp = $path . $this->tmpId;
+
+        $refPath = $this->getRefFilePath();
 
         $handler = $this->handlers[$this->meta->mime] ?? null;
         if ($handler !== null) {
@@ -245,47 +228,5 @@ class Resource {
      */
     private function getFilePath(int $width = 0, int $height = 0): string {
         return sprintf('%s/%s/%04d_%04d', $this->config->cache->dir, hash('xxh128', $this->meta->realUrl), $width, $height);
-    }
-
-    /**
-     * Fetches original resource
-     * 
-     * @throws FileToLargeException
-     */
-    private function fetchResourceBinary(string $path): void {
-        if ($this->meta->mime === '') {
-            return;
-        }
-
-        $this->log?->info("Downloading " . $this->meta->realUrl);
-
-        $dir = dirname($path);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0700, true);
-        }
-        $pathTmp = $path . $this->tmpId;
-
-        $opts   = ['stream' => true, 'http_errors' => false];
-        $client = new Client($opts);
-        $resp   = $client->send(new Request('get', $this->meta->realUrl));
-        // mime mismatch is most probably redirect to metadata
-        $mime   = $resp->getHeader('Content-Type')[0] ?? 'lacking content type';
-        if ($resp->getStatusCode() !== 200) {
-            throw new NoSuchFileException();
-        }
-        if ($mime !== $this->meta->mime) {
-            $this->log?->error("Mime mismatch: downloaded $mime, metadata " . $this->meta->mime);
-            throw new NoSuchFileException('The requested file misses binary content');
-        }
-        $body  = $resp->getBody();
-        $fout  = fopen($pathTmp, 'w') ?: throw new RuntimeException("Can't open $pathTmp for writing");
-        $chunk = 10 ^ 6; // 1 MB
-        while (!$body->eof()) {
-            fwrite($fout, (string) $body->read($chunk));
-        }
-        fclose($fout);
-        if (!file_exists($path)) {
-            rename($pathTmp, $path);
-        }
     }
 }

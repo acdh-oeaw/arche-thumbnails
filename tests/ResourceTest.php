@@ -34,6 +34,7 @@ use acdhOeaw\arche\thumbnails\Resource;
 use acdhOeaw\arche\thumbnails\ResourceMeta;
 use acdhOeaw\arche\thumbnails\ThumbnailException;
 use acdhOeaw\arche\lib\dissCache\ResponseCacheItem;
+use acdhOeaw\arche\lib\dissCache\FileCache;
 
 /**
  * Description of ResourceTest
@@ -141,6 +142,8 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         $path = self::$config->localAccess->$nmsp->dir . '/56/34/23456';
         mkdir(dirname($path), recursive: true);
         file_put_contents($path, '');
+        // new object is needed as the getRefFilePath() result is cached
+        $res = new Resource($meta, self::$config, null);
         $this->assertEquals($path, $res->getRefFilePath());
     }
 
@@ -151,14 +154,21 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         $meta                = $this->getResourceMeta('http://12345', $realUrl, 'class', 'image/png', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
             'sstuhec', 'public']);
         $res                 = new Resource($meta, $config, null);
-        $this->assertEquals($config->cache->dir . '/001726ab4849b793e901a00b451231ae/0000_0000', $res->getRefFilePath());
+        $this->assertEquals($config->cache->dir . '/001726ab4849b793e901a00b451231ae/' . FileCache::REF_FILE_NAME, $res->getRefFilePath());
     }
 
     public function testGetThumbnailPath(): void {
-        $meta = $this->getResourceMeta('http://12345', 'https://arche.acdh.oeaw.ac.at/api/504945', 'class', 'image/png', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
+        $meta       = $this->getResourceMeta('http://12345', 'https://arche.acdh.oeaw.ac.at/api/504945', 'class', 'image/png', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
             'sstuhec', 'public']);
-        $res  = new Resource($meta, self::$config, null);
-        $this->assertEquals(self::$config->cache->dir . '/001726ab4849b793e901a00b451231ae/0100_0100', $res->getThumbnailPath(100, 100));
+        $res        = new Resource($meta, self::$config, null);
+        $resp       = $res->getResponse(100, 100);
+        $refPath    = self::$config->cache->dir . '/001726ab4849b793e901a00b451231ae/0100_0100';
+        $refHeaders = [
+            'Content-Size' => 2847,
+            'Content-Type' => 'image/png',
+        ];
+        $refResp    = new ResponseCacheItem($refPath, 200, $refHeaders, false, true);
+        $this->assertEquals($refResp, $resp);
     }
 
     public function testGetThumbnailPathUnauthorized(): void {
@@ -166,7 +176,7 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
             'ikant-head']);
         $res  = new Resource($meta, self::$config, null);
         try {
-            $res->getThumbnailPath(100, 100);
+            $res->getResponse(100, 100);
             $this->assertTrue(false);
         } catch (ThumbnailException $ex) {
             $this->assertTrue(true);
