@@ -143,7 +143,7 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         mkdir(dirname($path), recursive: true);
         file_put_contents($path, '');
         // new object is needed as the getRefFilePath() result is cached
-        $res = new Resource($meta, self::$config, null);
+        $res  = new Resource($meta, self::$config, null);
         $this->assertEquals($path, $res->getRefFilePath());
     }
 
@@ -164,7 +164,7 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         $resp       = $res->getResponse(100, 100);
         $refPath    = self::$config->cache->dir . '/001726ab4849b793e901a00b451231ae/0100_0100';
         $refHeaders = [
-            'Content-Size' => 2847,
+            'Content-Size' => (string) filesize($refPath),
             'Content-Type' => 'image/png',
         ];
         $refResp    = new ResponseCacheItem($refPath, 200, $refHeaders, false, true);
