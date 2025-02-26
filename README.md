@@ -9,11 +9,11 @@ For images it simply provides thumbnails and for another resources it tries to d
 
 To speed things up it caches provided results.
 
-It can be queried as `{deploymentUrl}/{archeID}?{parameters}`, where
+It can be queried as `{deploymentUrl}/?{parameters}`, where available parameters are
 
-* `{archeId}` is either a full ARCHE resource id (e.g. `https://id.acdh.oeaw.ac.at/Troesmis`) or an ARCHE resource id with the ACDH id namespace skipped (e.g. `Troesmis` as the ACDH id namespace is `https://id.acdh.oeaw.ac.at/`). In both cases the **value should be properly URL encoded**.
-* supported parameters are:
-    * `width`, `height` - width and height of a thumbnail (in pixels)
+* `id={archeId}` (**required**) where the `archeId` is any identifier of an ARCHE resource. The **value should be properly URL encoded**.
+* `width` (optional) a requested thumbnail width in pixels (if only `height` is specified, it is computed automatically to keep the aspect ratio)
+* `height` (optional) a requested thumbnail height in pixels (if only `width` is specified, it is computed automatically to keep the aspect ratio)
 
 ## Extending
 
