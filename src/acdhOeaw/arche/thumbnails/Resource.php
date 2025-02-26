@@ -134,7 +134,7 @@ class Resource {
             return new ResponseCacheItem($path, 200, $headers, false, true);
         }
 
-        $limit = $this->maxFileSizeMb ?? self::DEFAULT_MAX_FILE_SIZE_MB;
+        $limit = $this->config->maxFileSizeMb ?? self::DEFAULT_MAX_FILE_SIZE_MB;
         if ($this->meta->sizeMb > $limit) {
             throw new FileToLargeException("Resource size (" . $this->meta->sizeMb . " MB) exceeds the limit ($limit MB");
         }
