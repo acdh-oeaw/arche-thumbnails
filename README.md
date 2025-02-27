@@ -1,4 +1,4 @@
-# Repo-thumbnails
+# ARCHE-thumbnails
 
 [![Build status](https://github.com/acdh-oeaw/arche-thumbnails/actions/workflows/deploy.yaml/badge.svg)](https://github.com/acdh-oeaw/arche-thumbnails/actions/workflows/deploy.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/acdh-oeaw/arche-thumbnails/badge.svg?branch=master)](https://coveralls.io/github/acdh-oeaw/arche-thumbnails?branch=master)
