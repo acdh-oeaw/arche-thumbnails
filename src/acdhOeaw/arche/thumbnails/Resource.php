@@ -128,10 +128,14 @@ class Resource {
         $headers = ['Content-Type' => 'image/png'];
 
         // if the thumbnail exists and is up to date, just serve it
-        if (file_exists($path) && filemtime($path) > $this->meta->modDate->getTimestamp()) {
-            $this->log?->info("Serving $width x $height thumbnail from cache $path");
-            $headers['Content-Size'] = (string) filesize($path);
-            return new ResponseCacheItem($path, 200, $headers, false, true);
+        if (file_exists($path)) {
+            if (filemtime($path) > $this->meta->modDate->getTimestamp()) {
+                $this->log?->info("Serving $width x $height thumbnail from cache $path");
+                $headers['Content-Size'] = (string) filesize($path);
+                return new ResponseCacheItem($path, 200, $headers, false, true);
+            } else {
+                unlink($path);
+            }
         }
 
         $limit = $this->config->maxFileSizeMb ?? self::DEFAULT_MAX_FILE_SIZE_MB;
@@ -200,7 +204,7 @@ class Resource {
         if (!file_exists($pathTmp)) {
             throw new NoSuchFileException("Thumbnail was not properly generated", 500);
         } else {
-            $this->log?->info("Thumbnail generated");
+            $this->log?->info("Thumbnail saved as $path");
         }
 
         if (!file_exists($path)) {
