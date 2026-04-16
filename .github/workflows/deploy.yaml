@@ -24,7 +24,6 @@ jobs:
         run: sudo apt install -y gsfonts
       - uses: acdh-oeaw/arche_cicd_start_action@main
         with:
-          phpVersion: 8.2
           phpExtensions: json,pcre,yaml,imagick,pdo,pdo_sqlite,pdo_pgsql
           phpstanLevel: 4
           prepareRepoConfig: true
