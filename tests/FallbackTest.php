@@ -52,6 +52,9 @@ class FallbackTest extends HandlerTestBase {
                 break;
             }
         }
+        if (!isset($handler)) {
+            throw new \RuntimeException('No handler found');
+        }
 
         $meta        = new ResourceMeta();
         $meta->mime  = '';
@@ -104,8 +107,10 @@ class FallbackTest extends HandlerTestBase {
         $res->method('getMeta')->willReturn($meta);
         try {
             $handler->createThumbnail($res, 100, 100, self::TMP_FILE);
+            /** @phpstan-ignore method.impossibleType */
             $this->assertTrue(false);
         } catch (NoThumbnailException) {
+            /** @phpstan-ignore method.alreadyNarrowedType */
             $this->assertTrue(true);
         }
     }
@@ -117,5 +122,6 @@ class FallbackTest extends HandlerTestBase {
                 return $i->config;
             }
         }
+        throw new \RuntimeException('No config found');
     }
 }

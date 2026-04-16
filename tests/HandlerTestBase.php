@@ -43,6 +43,7 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
     static public function setUpBeforeClass(): void {
         $config = json_decode(json_encode(yaml_parse_file(__DIR__ . '/config.yaml')));
         foreach ($config->mimeHandlers as $i) {
+            /** @phpstan-ignore classConstant.notFound */
             if (preg_replace('`^\\\\`', '', $i->class) === static::HANDLER_CLASS) {
                 $class         = $i->class;
                 self::$handler = new $class($i->config ?? new \stdClass());
@@ -63,11 +64,13 @@ class HandlerTestBase extends \PHPUnit\Framework\TestCase {
     }
 
     public function testGetHandledMimeTypes(): void {
+        /** @phpstan-ignore classConstant.notFound */
         $expected = static::MIME_TYPES;
         $this->assertEquals($expected, self::$handler->getHandledMimeTypes());
     }
 
     public function testMaintainsAspectRatio(): void {
+        /** @phpstan-ignore classConstant.notFound */
         $this->assertEquals(static::MAINTAINS_ASPECT_RATIO, self::$handler->maintainsAspectRatio());
     }
 

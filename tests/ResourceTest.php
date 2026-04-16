@@ -177,8 +177,10 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         $res  = new Resource($meta, self::$config, null);
         try {
             $res->getResponse(100, 100);
+            /** @phpstan-ignore method.impossibleType */
             $this->assertTrue(false);
         } catch (ThumbnailException $ex) {
+            /** @phpstan-ignore method.alreadyNarrowedType */
             $this->assertTrue(true);
         }
     }
