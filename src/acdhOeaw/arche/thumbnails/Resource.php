@@ -33,8 +33,8 @@ use quickRdf\DataFactory as DF;
 use termTemplates\PredicateTemplate as PT;
 use termTemplates\QuadTemplate as QT;
 use acdhOeaw\arche\lib\dissCache\ResponseCacheItem;
-use acdhOeaw\arche\lib\dissCache\FileCache;
 use acdhOeaw\arche\lib\dissCache\FileCacheException;
+use acdhOeaw\arche\lib\dissCache\CallbackContextInterface;
 use acdhOeaw\arche\lib\RepoResourceInterface;
 use acdhOeaw\arche\thumbnails\handler\HandlerInterface;
 
@@ -45,7 +45,6 @@ use acdhOeaw\arche\thumbnails\handler\HandlerInterface;
  */
 class Resource {
 
-    const DEFAULT_MAX_FILE_SIZE_MB = 100;
     const REAL_URL_PROP            = 'http://real/url';
 
     /**
@@ -55,11 +54,22 @@ class Resource {
      * @param array<mixed> $param
      */
     static public function cacheHandler(RepoResourceInterface $res,
-                                        array $param, object $schema,
-                                        ?LoggerInterface $log = null): ResponseCacheItem {
+                                        array $param,
+                                        CallbackContextInterface $context,
+                                        object $config): ResponseCacheItem {
+        $resourceMeta = self::getResourceMeta($res, $param, $context, $config);
+        $res          = new Resource($resourceMeta, $config, $context);
+        return $res->getResponse($param[0], $param[1]);
+    }
+
+    public static function getResourceMeta(RepoResourceInterface $res,
+                                        CallbackContextInterface $context,
+                                        object $config): ResourceMeta {
         $resUri = $res->getUri();
         $graph  = $res->getGraph()->getDataset();
-
+        $log    = $context->getLog();
+        $schema = $config->schema;
+        
         // handle isTitleResourceOf
         $titleImageProp = DF::namedNode($schema->titleImage);
         $idProp         = DF::namedNode($schema->id);
@@ -89,30 +99,24 @@ class Resource {
             // in case an titleImageOf is accessed directly
             $graph->delete(new QT($resUri, $titleImageProp));
         }
-
-        // return ResourceMeta
-        $resourceMeta = ResourceMeta::fromDatasetNode($res->getGraph(), $schema);
-        return new ResponseCacheItem($resourceMeta->serialize());
+        return ResourceMeta::fromDatasetNode($res->getGraph(), $schema);        
     }
-
+    
     /**
      * 
      * @var array<HandlerInterface>
      */
     private array $handlers = [];
     private HandlerInterface $defaultHandler;
-    private object $config;
-    private ResourceMeta $meta;
-    private LoggerInterface | null $log;
     private string $refFilePath;
     private string $tmpId;
+    private LoggerInterface | null $log;
 
-    public function __construct(ResourceMeta $meta, object $config,
-                                ?LoggerInterface $log) {
-        $this->meta   = $meta;
-        $this->config = $config;
-        $this->log    = $log;
-        $this->tmpId  = '.tmp' . rand(0, 100000);
+    public function __construct(private ResourceMeta $meta,
+                                private object $config,
+                                private CallbackContextInterface $context) {
+        $this->tmpId = '.tmp' . rand(0, 100000);
+        $this->log   = $context->getLog();
 
         $this->log?->debug(json_encode($meta, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
@@ -128,7 +132,7 @@ class Resource {
         $headers = ['Content-Type' => 'image/png'];
 
         // if the thumbnail exists and is up to date, just serve it
-        if (file_exists($path)) {
+        if (file_exists($path) && !$this->context->getNoCache()) {
             if (filemtime($path) > $this->meta->modDate->getTimestamp()) {
                 $this->log?->info("Serving $width x $height thumbnail from cache $path");
                 $headers['Content-Size'] = (string) filesize($path);
@@ -138,7 +142,7 @@ class Resource {
             }
         }
 
-        $limit = $this->config->maxFileSizeMb ?? self::DEFAULT_MAX_FILE_SIZE_MB;
+        $limit = $this->context->getFileCache()->maxDwnldSizeMB;
         if ($this->meta->sizeMb > $limit) {
             throw new FileToLargeException("Resource size (" . $this->meta->sizeMb . " MB) exceeds the limit ($limit MB");
         }
@@ -150,9 +154,8 @@ class Resource {
 
     public function getRefFilePath(): string {
         if (!isset($this->refFilePath)) {
-            $fileCache = new FileCache($this->config->cache->dir, $this->log, (array) $this->config->localAccess);
             try {
-                $this->refFilePath = $fileCache->getRefFilePath($this->meta->realUrl, $this->meta->mime);
+                $this->refFilePath = $this->context->getFileCache()->getRefFilePath($this->meta->realUrl, $this->meta->mime, $this->context->getNoCache());
             } catch (FileCacheException $e) {
                 $this->refFilePath = '';
             }
@@ -231,6 +234,6 @@ class Resource {
      * @return string
      */
     private function getFilePath(int $width = 0, int $height = 0): string {
-        return sprintf('%s/%s/%04d_%04d', $this->config->cache->dir, hash('xxh128', $this->meta->realUrl), $width, $height);
+        return sprintf('%s/%s/%04d_%04d', $this->context->getFileCache()->dir, hash('xxh128', $this->meta->realUrl), $width, $height);
     }
 }

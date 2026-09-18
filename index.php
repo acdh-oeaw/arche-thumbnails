@@ -26,7 +26,6 @@
 
 use acdhOeaw\arche\lib\dissCache\Service;
 use acdhOeaw\arche\thumbnails\Resource;
-use acdhOeaw\arche\thumbnails\ResourceMeta;
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: X-Requested-With, Content-Type');
@@ -39,7 +38,7 @@ $service = new Service(__DIR__ . '/config.yaml');
 
 $config = $service->getConfig();
 $log    = $service->getLog();
-$clbck  = fn($res, $param) => Resource::cacheHandler($res, $param, $config->schema, $log);
+$clbck  = fn($res, $param, $context) => Resource::cacheHandler($res, $param, $context, $config);
 $service->setCallback($clbck);
 
 $width  = filter_input(INPUT_GET, 'width') ?? 0;
@@ -48,15 +47,10 @@ if ($width === 0 && $height === 0) {
     $width  = $config->defaultWidth;
     $height = $config->defaultHeight;
 }
-$response = $service->serveRequest($_GET['id'] ?? '', [$width, $height]);
-if ($response->responseCode === 0) {
-    try {
-        $resMeta  = ResourceMeta::deserialize($response->body);
-        $res      = new Resource($resMeta, $config, $log);
-        $response = $res->getResponse($width, $height);
-    } catch (Throwable $e) {
-        $response = $service->processException($e);
-    }
+try {
+    $response = $service->serveRequest($_GET['id'] ?? '', [$width, $height]);
+} catch (Throwable $e) {
+    $response = $service->processException($e);
 }
 $response->send();
 $log->info("Response served in " . round(microtime(true) - $t0, 3) . " s");

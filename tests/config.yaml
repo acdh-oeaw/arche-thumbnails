@@ -38,14 +38,16 @@ dissCacheService:
 defaultWidth: 100
 defaultHeight: 100
 maxFileSizeMb: 100
-cache:
+fileCache:
   dir: /tmp/__thumbnailtest__
+  maxDownloadSizeMb: 100
+  mimeProperty: https://vocabs.acdh.oeaw.ac.at/schema#hasFormat
+  localAccess:
+    https://arche.acdh.oeaw.ac.at/api/:
+      dir: /tmp/__thumbnailtest__
+      level: 2
   clearMode: size # 'size' or 'time'
   maxSizeMb: 2000
-localAccess:
-  https://arche.acdh.oeaw.ac.at/api/:
-    dir: /tmp/__thumbnailtest__
-    level: 2
 schema:
   id: https://vocabs.acdh.oeaw.ac.at/schema#hasIdentifier
   modDate: https://vocabs.acdh.oeaw.ac.at/schema#hasUpdatedDate

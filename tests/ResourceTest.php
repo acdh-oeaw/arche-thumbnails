@@ -35,6 +35,7 @@ use acdhOeaw\arche\thumbnails\ResourceMeta;
 use acdhOeaw\arche\thumbnails\ThumbnailException;
 use acdhOeaw\arche\lib\dissCache\ResponseCacheItem;
 use acdhOeaw\arche\lib\dissCache\FileCache;
+use \acdhOeaw\arche\lib\dissCache\CallbackContextStub;
 
 /**
  * Description of ResourceTest
@@ -45,6 +46,7 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
 
     static private object $config;
     static private object $schema;
+    static private CallbackContextStub $context;
 
     static public function setUpBeforeClass(): void {
         parent::setUpBeforeClass();
@@ -54,24 +56,28 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         foreach (self::$config->schema as $k => $v) {
             self::$schema->$k = DF::namedNode($v);
         }
+        self::$context = new CallbackContextStub();
     }
 
     public function setUp(): void {
         parent::setUp();
 
-        mkdir(self::$config->cache->dir, recursive: true);
-        foreach ((array) (self::$config->localAccess ?? []) as $i) {
+        $cfg = self::$config->fileCache;
+        mkdir($cfg->dir, recursive: true);
+        foreach ((array) ($cfg->localAccess ?? []) as $i) {
             if (!file_exists($i->dir)) {
                 mkdir($i->dir, recursive: true);
             }
         }
+        self::$context->fileCache = FileCache::fromConfig($cfg);
     }
 
     public function tearDown(): void {
         parent::tearDown();
 
-        system('rm -fR "' . self::$config->cache->dir . '"');
-        foreach ((array) (self::$config->localAccess ?? []) as $i) {
+        $cfg = self::$config->fileCache;
+        system('rm -fR "' . $cfg->dir . '"');
+        foreach ((array) ($cfg->localAccess ?? []) as $i) {
             system('rm -fR "' . $i->dir . '"');
         }
     }
@@ -86,9 +92,8 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
 
         // no metadata
         $graph->add(DF::quad($resUri, self::$schema->modDate, DF::literal($modDate)));
-        $resp    = Resource::cacheHandler($res, [], self::$config->schema, null);
-        $refResp = $this->getRefResponseItem((string) $resUri, (string) $resUri, '__no class__', '', '__no hash__', 0, $modDate, [
-            ]);
+        $resp    = Resource::getResourceMeta($res, self::$context, self::$config);
+        $refResp = $this->getResourceMeta((string) $resUri, (string) $resUri, '__no class__', '', '__no hash__', 0, $modDate, []);
         $this->assertEquals($refResp, $resp);
 
         // ordinaty metadata
@@ -100,8 +105,8 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
             DF::quad($resUri, self::$schema->modDate, DF::literal($modDate)),
             DF::quad($resUri, self::$schema->aclRead, DF::literal("public")),
         ]);
-        $resp    = Resource::cacheHandler($res, [], self::$config->schema, null);
-        $refResp = $this->getRefResponseItem((string) $resUri, (string) $resUri, 'http://my/class', 'foo/bar', 'sha1:foobar', 1234, $modDate, [
+        $resp    = Resource::getResourceMeta($res, self::$context, self::$config);
+        $refResp = $this->getResourceMeta((string) $resUri, (string) $resUri, 'http://my/class', 'foo/bar', 'sha1:foobar', 1234, $modDate, [
             'public']);
         $this->assertEquals($refResp, $resp);
 
@@ -116,8 +121,8 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
             DF::quad($titleImgUri, self::$schema->modDate, DF::literal('2024-10-01 09:46:30')),
             DF::quad($titleImgUri, self::$schema->aclRead, DF::literal("sstuhec")),
         ]);
-        $resp        = Resource::cacheHandler($res, [], self::$config->schema, null);
-        $refResp     = $this->getRefResponseItem((string) $resUri, (string) $titleImgUri, 'http://titleImg/class', 'bar/baz', 'sha1:barbaz', 2345, '2024-10-01 09:46:30', [
+        $resp        = Resource::getResourceMeta($res, self::$context, self::$config);
+        $refResp     = $this->getResourceMeta((string) $resUri, (string) $titleImgUri, 'http://titleImg/class', 'bar/baz', 'sha1:barbaz', 2345, '2024-10-01 09:46:30', [
             'sstuhec']);
         $this->assertEquals($refResp, $resp);
     }
@@ -125,7 +130,7 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
     public function testGetMeta(): void {
         $meta = $this->getResourceMeta('http://foo', 'http://bar', 'class', 'major/minor', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
             'foo', 'bar']);
-        $res  = new Resource($meta, self::$config, null);
+        $res  = new Resource($meta, self::$config, self::$context);
         $this->assertEquals($meta, $res->getMeta());
     }
 
@@ -135,34 +140,37 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
             'public']);
 
         // local with missing binary
-        $res = new Resource($meta, self::$config, null);
+        $res = new Resource($meta, self::$config, self::$context);
         $this->assertEquals('', $res->getRefFilePath());
 
         // local with existing binary
-        $path = self::$config->localAccess->$nmsp->dir . '/56/34/23456';
+        $path = self::$config->fileCache->localAccess->$nmsp->dir . '/56/34/23456';
         mkdir(dirname($path), recursive: true);
         file_put_contents($path, '');
         // new object is needed as the getRefFilePath() result is cached
-        $res  = new Resource($meta, self::$config, null);
+        $res  = new Resource($meta, self::$config, self::$context);
         $this->assertEquals($path, $res->getRefFilePath());
     }
 
     public function testGetRefFilePathRemote(): void {
+        $context = new CallbackContextStub();
+        $cfg = json_decode(json_encode(self::$config->fileCache));
+        $cfg->localAccess = [];
+        $context->fileCache = FileCache::fromConfig($cfg);
+        
         $realUrl             = 'https://arche.acdh.oeaw.ac.at/api/504945';
-        $config              = json_decode(json_encode(self::$config));
-        $config->localAccess = null;
         $meta                = $this->getResourceMeta('http://12345', $realUrl, 'class', 'image/png', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
             'sstuhec', 'public']);
-        $res                 = new Resource($meta, $config, null);
-        $this->assertEquals($config->cache->dir . '/001726ab4849b793e901a00b451231ae/' . FileCache::REF_FILE_NAME, $res->getRefFilePath());
+        $res                 = new Resource($meta, self::$config, $context);
+        $this->assertEquals(self::$context->fileCache->dir . '/001726ab4849b793e901a00b451231ae/' . FileCache::REF_FILE_NAME, $res->getRefFilePath());
     }
 
     public function testGetThumbnailPath(): void {
         $meta       = $this->getResourceMeta('http://12345', 'https://arche.acdh.oeaw.ac.at/api/504945', 'class', 'image/png', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
             'sstuhec', 'public']);
-        $res        = new Resource($meta, self::$config, null);
+        $res        = new Resource($meta, self::$config, self::$context);
         $resp       = $res->getResponse(100, 100);
-        $refPath    = self::$config->cache->dir . '/001726ab4849b793e901a00b451231ae/0100_0100';
+        $refPath    = self::$config->fileCache->dir . '/001726ab4849b793e901a00b451231ae/0100_0100';
         $refHeaders = [
             'Content-Size' => (string) filesize($refPath),
             'Content-Type' => 'image/png',
@@ -174,7 +182,7 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
     public function testGetThumbnailPathUnauthorized(): void {
         $meta = $this->getResourceMeta('http://12345', 'https://arche.acdh.oeaw.ac.at/api/504945', 'class', 'image/png', 'sha1:foobar', 25, '2024-01-06 20:45:13', [
             'ikant-head']);
-        $res  = new Resource($meta, self::$config, null);
+        $res  = new Resource($meta, self::$config, self::$context);
         try {
             $res->getResponse(100, 100);
             /** @phpstan-ignore method.impossibleType */
@@ -185,6 +193,18 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         }
     }
 
+    /**
+     * 
+     * @param string $url
+     * @param string $realUrl
+     * @param string $class
+     * @param string $mime
+     * @param string $hash
+     * @param int $sizeMb
+     * @param string $modDate
+     * @param array<string> $aclRead
+     * @return ResourceMeta
+     */
     private function getResourceMeta(string $url, string $realUrl,
                                      string $class, string $mime, string $hash,
                                      int $sizeMb, string $modDate,
@@ -201,6 +221,18 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         return $meta;
     }
 
+    /**
+     * 
+     * @param string $url
+     * @param string $realUrl
+     * @param string $class
+     * @param string $mime
+     * @param string $hash
+     * @param int $sizeMb
+     * @param string $modDate
+     * @param array<string> $aclRead
+     * @return ResponseCacheItem
+     */
     private function getRefResponseItem(string $url, string $realUrl,
                                         string $class, string $mime,
                                         string $hash, int $sizeMb,
