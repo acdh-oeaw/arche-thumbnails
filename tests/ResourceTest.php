@@ -221,23 +221,4 @@ class ResourceTest extends \PHPUnit\Framework\TestCase {
         return $meta;
     }
 
-    /**
-     * 
-     * @param string $url
-     * @param string $realUrl
-     * @param string $class
-     * @param string $mime
-     * @param string $hash
-     * @param int $sizeMb
-     * @param string $modDate
-     * @param array<string> $aclRead
-     * @return ResponseCacheItem
-     */
-    private function getRefResponseItem(string $url, string $realUrl,
-                                        string $class, string $mime,
-                                        string $hash, int $sizeMb,
-                                        string $modDate, array $aclRead): ResponseCacheItem {
-        $meta = $this->getResourceMeta($url, $realUrl, $class, $mime, $hash, $sizeMb, $modDate, $aclRead);
-        return new ResponseCacheItem($meta->serialize(), 0, [], false);
-    }
 }

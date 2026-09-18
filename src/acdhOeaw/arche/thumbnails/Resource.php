@@ -57,7 +57,7 @@ class Resource {
                                         array $param,
                                         CallbackContextInterface $context,
                                         object $config): ResponseCacheItem {
-        $resourceMeta = self::getResourceMeta($res, $param, $context, $config);
+        $resourceMeta = self::getResourceMeta($res, $context, $config);
         $res          = new Resource($resourceMeta, $config, $context);
         return $res->getResponse($param[0], $param[1]);
     }
